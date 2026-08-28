@@ -1,16 +1,17 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useRef } from "react";
 import dynamic from "next/dynamic";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { useGSAP } from "@gsap/react";
-import { AnimatePresence, motion } from "motion/react";
+import { useReducedMotion } from "motion/react";
 import { ArrowDown } from "@phosphor-icons/react";
 import { useLang } from "@/components/providers/LanguageProvider";
 import { scrollToId } from "@/lib/utils";
 
 const ParticleField = dynamic(() => import("@/components/ParticleField"), { ssr: false });
+const TextType = dynamic(() => import("@/components/reactbits/TextType"), { ssr: false });
 import SpotlightReveal from "@/components/SpotlightReveal";
 
 gsap.registerPlugin(ScrollTrigger, useGSAP);
@@ -19,16 +20,7 @@ export default function Hero() {
   const { t } = useLang();
   const sectionRef = useRef<HTMLElement>(null);
   const canvasWrapRef = useRef<HTMLDivElement>(null);
-  const [roleIndex, setRoleIndex] = useState(0);
-
-  // Rotador de roles
-  useEffect(() => {
-    const id = window.setInterval(
-      () => setRoleIndex((i) => (i + 1) % t.hero.roles.length),
-      2700,
-    );
-    return () => window.clearInterval(id);
-  }, [t.hero.roles.length]);
+  const reduce = useReducedMotion() ?? false;
 
   // Intro GSAP + parallax del canvas (useGSAP: cleanup automático y scope)
   useGSAP(
@@ -96,18 +88,20 @@ export default function Hero() {
 
         <div className="hero-fade mt-7 flex h-7 items-center font-mono text-sm text-cyan sm:text-base">
           <span className="mr-2 select-none text-violet">▸</span>
-          <AnimatePresence mode="wait">
-            <motion.span
-              key={roleIndex}
-              initial={{ y: 14, opacity: 0 }}
-              animate={{ y: 0, opacity: 1 }}
-              exit={{ y: -14, opacity: 0 }}
-              transition={{ duration: 0.35, ease: "easeOut" }}
-              className="inline-block"
-            >
-              {t.hero.roles[roleIndex]}
-            </motion.span>
-          </AnimatePresence>
+          {reduce ? (
+            t.hero.roles[0]
+          ) : (
+            <TextType
+              text={t.hero.roles}
+              as="span"
+              typingSpeed={42}
+              deletingSpeed={26}
+              pauseDuration={1900}
+              initialDelay={900}
+              cursorCharacter="▌"
+              cursorClassName="text-violet"
+            />
+          )}
         </div>
 
         <p className="hero-fade mt-6 max-w-xl text-base leading-relaxed text-muted sm:text-lg">

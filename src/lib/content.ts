@@ -166,6 +166,8 @@ const es = {
   certs: {
     kicker: "CREDENCIALES",
     title: "Certificaciones",
+    prevLabel: "Anterior",
+    nextLabel: "Siguiente",
     groups: [
       {
         name: "AWS · Certificaciones base",
@@ -364,6 +366,8 @@ const en: typeof es = {
   certs: {
     kicker: "CREDENTIALS",
     title: "Certifications",
+    prevLabel: "Previous",
+    nextLabel: "Next",
     groups: [
       {
         name: "AWS · Core certifications",

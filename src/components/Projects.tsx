@@ -1,11 +1,14 @@
 "use client";
 
 import { ArrowUpRight, LockSimple, Trophy } from "@phosphor-icons/react";
+import { useReducedMotion } from "motion/react";
 import SectionHeading from "@/components/SectionHeading";
+import DecryptedText from "@/components/reactbits/DecryptedText";
 import { useLang } from "@/components/providers/LanguageProvider";
 
 export default function Projects() {
   const { t } = useLang();
+  const reduce = useReducedMotion() ?? false;
 
   return (
     <section id="proyectos" className="relative py-28 md:py-36">
@@ -17,6 +20,11 @@ export default function Projects() {
             const link: string | null = p.link ?? null;
             const card = (
               <>
+                {/* Pipeline: scan de luz al hover, como un deploy progresando */}
+                <span aria-hidden className="pointer-events-none absolute inset-x-0 top-0 h-px overflow-hidden rounded-t-[inherit]">
+                  <span className="block h-px w-1/3 -translate-x-[110%] bg-gradient-to-r from-transparent via-cyan to-transparent transition-transform duration-700 ease-out group-hover:translate-x-[340%]" />
+                </span>
+
                 <div className="flex items-center justify-between">
                   <span className="font-mono text-xs text-muted">{p.year}</span>
                   <ArrowUpRight
@@ -34,7 +42,18 @@ export default function Projects() {
                 )}
 
                 <h3 className="mt-4 font-display text-xl font-bold tracking-tight transition-colors duration-300 group-hover:text-cyan sm:text-[22px]">
-                  {p.name}
+                  {reduce ? (
+                    p.name
+                  ) : (
+                    <DecryptedText
+                      text={p.name}
+                      animateOn="hover"
+                      speed={24}
+                      maxIterations={7}
+                      characters="!<>-_\\/[]{}=+*^?#"
+                      encryptedClassName="text-cyan/50"
+                    />
+                  )}
                 </h3>
                 <p className="mt-2.5 grow text-sm leading-relaxed text-muted">{p.description}</p>
 

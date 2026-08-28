@@ -1,15 +1,16 @@
 "use client";
 
-import { useRef, useState, useCallback } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { CaretLeft, CaretRight } from "@phosphor-icons/react";
 import { useReducedMotion } from "motion/react";
 import SectionHeading from "@/components/SectionHeading";
 import { useLang } from "@/components/providers/LanguageProvider";
 
 /**
- * Carrusel de credenciales. Las certificaciones con arte oficial usan su badge;
- * el resto lleva un sello monograma en el mismo lenguaje visual. Scroll-snap
- * manual (sin auto-avance), accesible por teclado y con barra de progreso.
+ * Carrusel de credenciales estilo "placas edge-lit": las cards son placas
+ * oscuras; la card centrada se levanta, se inclina hacia el centro y enciende
+ * su borde azul mientras las laterales se atenúan. Scroll-snap manual,
+ * accesible por teclado y con barra de progreso.
  */
 
 type Seal = { label: string; accent: string; sub?: string };
@@ -38,18 +39,79 @@ export default function Certifications() {
   const reduce = useReducedMotion() ?? false;
   const trackRef = useRef<HTMLDivElement>(null);
   const fillRef = useRef<HTMLDivElement>(null);
+  const cardRefs = useRef<Array<HTMLElement | null>>([]);
+  const dimRefs = useRef<Array<HTMLDivElement | null>>([]);
+  const rafRef = useRef<number>(0);
   const [atStart, setAtStart] = useState(true);
   const [atEnd, setAtEnd] = useState(false);
 
   const items = t.certs.groups.flatMap((g) => g.items.map((item) => ({ ...item, group: g.name })));
 
-  const step = useCallback((dir: 1 | -1) => {
+  // Coverflow: exactamente UNA card (la más cercana al centro) está encendida,
+  // levantada e inclinada; las demás se atenúan según su distancia. El rol de
+  // protagonista pasa a la siguiente a mitad de camino del scroll.
+  const updateCoverflow = useCallback(() => {
     const el = trackRef.current;
     if (!el) return;
-    const card = el.firstElementChild as HTMLElement | null;
-    const delta = (card ? card.offsetWidth : 240) + 20;
-    el.scrollBy({ left: dir * delta, behavior: reduce ? "auto" : "smooth" });
-  }, [reduce]);
+    const center = el.getBoundingClientRect().left + el.clientWidth / 2;
+    const span = el.clientWidth * 0.7;
+
+    const metrics = cardRefs.current.map((card) => {
+      if (!card) return null;
+      const r = card.getBoundingClientRect();
+      const offset = Math.max(-1.25, Math.min(1.25, (r.left + r.width / 2 - center) / span));
+      return { offset, abs: Math.abs(offset) };
+    });
+
+    let nearest = -1;
+    let nearestAbs = Infinity;
+    metrics.forEach((m, i) => {
+      if (m && m.abs < nearestAbs) {
+        nearestAbs = m.abs;
+        nearest = i;
+      }
+    });
+
+    metrics.forEach((m, i) => {
+      const card = cardRefs.current[i];
+      if (!card || !m) return;
+      const isHero = i === nearest;
+      const glow = isHero ? 1 : 0;
+      card.style.transform = `perspective(950px) rotateY(${m.offset * -7}deg) scale(${1 - Math.min(m.abs, 1) * 0.055}) translateY(${-7 * glow}px)`;
+      card.style.boxShadow = isHero
+        ? "0 0 0 1px rgba(56,189,248,0.55), 0 0 36px -4px rgba(56,189,248,0.6), 0 18px 44px -18px rgba(0,0,0,0.85)"
+        : "";
+      card.style.borderColor = isHero ? "rgba(56,189,248,0.5)" : "";
+      const dim = dimRefs.current[i];
+      if (dim) dim.style.opacity = isHero ? "0" : String(Math.min(m.abs * 0.75, 0.55));
+    });
+  }, []);
+
+  const scheduleUpdate = useCallback(() => {
+    cancelAnimationFrame(rafRef.current);
+    rafRef.current = requestAnimationFrame(updateCoverflow);
+  }, [updateCoverflow]);
+
+  useEffect(() => {
+    if (reduce) return;
+    updateCoverflow();
+    window.addEventListener("resize", scheduleUpdate);
+    return () => {
+      window.removeEventListener("resize", scheduleUpdate);
+      cancelAnimationFrame(rafRef.current);
+    };
+  }, [reduce, updateCoverflow, scheduleUpdate]);
+
+  const step = useCallback(
+    (dir: 1 | -1) => {
+      const el = trackRef.current;
+      if (!el) return;
+      const card = el.firstElementChild as HTMLElement | null;
+      const delta = (card ? card.offsetWidth : 240) + 20;
+      el.scrollBy({ left: dir * delta, behavior: reduce ? "auto" : "smooth" });
+    },
+    [reduce],
+  );
 
   const onScroll = useCallback(() => {
     const el = trackRef.current;
@@ -59,7 +121,8 @@ export default function Certifications() {
     if (fillRef.current) fillRef.current.style.transform = `scaleX(${p})`;
     setAtStart(el.scrollLeft <= 4);
     setAtEnd(el.scrollLeft >= max - 4);
-  }, []);
+    if (!reduce) scheduleUpdate();
+  }, [reduce, scheduleUpdate]);
 
   return (
     <section id="certificaciones" className="relative py-28 md:py-36">
@@ -100,25 +163,26 @@ export default function Certifications() {
             return (
               <article
                 key={c.name}
+                ref={(el) => {
+                  cardRefs.current[i] = el;
+                }}
                 role="listitem"
                 data-reveal
-                className="panel-card group w-[236px] shrink-0 snap-start p-5 sm:w-[252px]"
+                className="panel-card group relative w-[240px] shrink-0 snap-start rounded-[20px] p-5 transition-[box-shadow,border-color] duration-500 will-change-transform sm:w-[258px]"
               >
-                {/* Marco: badge oficial o sello monograma */}
-                <div className="relative mx-auto grid aspect-square w-36 place-items-center">
+                {/* Placa: interior más profundo + filo de vidrio superior */}
+                <div aria-hidden className="pointer-events-none absolute inset-0 rounded-[inherit] bg-gradient-to-b from-white/[0.04] to-transparent" />
+                <div aria-hidden className="pointer-events-none absolute inset-x-6 top-0 h-px bg-gradient-to-r from-transparent via-white/25 to-transparent" />
+
+                {/* Marco del badge: blanco para el arte oficial, placa oscura para sellos */}
+                <div className="relative mx-auto aspect-square w-36">
                   {visual?.img ? (
-                    <>
-                      <div className="absolute inset-0 rounded-full bg-cyan/[0.06] blur-xl transition-opacity duration-500 group-hover:opacity-100 sm:opacity-60" />
+                    <div className="grid size-full place-items-center rounded-xl bg-[#eef1f7] p-4 shadow-[0_12px_30px_rgba(0,0,0,0.55),inset_0_1px_0_rgba(255,255,255,0.9)] transition-transform duration-500 group-hover:scale-[1.03]">
                       {/* eslint-disable-next-line @next/next/no-img-element */}
-                      <img
-                        src={visual.img}
-                        alt=""
-                        loading="lazy"
-                        className="relative size-full rounded-lg object-contain shadow-[0_6px_18px_rgba(0,0,0,0.45)] ring-1 ring-white/10 transition-transform duration-500 group-hover:scale-[1.04]"
-                      />
-                    </>
+                      <img src={visual.img} alt="" loading="lazy" className="size-full object-contain" />
+                    </div>
                   ) : (
-                    <div className="relative grid size-full place-items-center overflow-hidden rounded-2xl border border-white/[0.08] bg-white/[0.02]">
+                    <div className="relative grid size-full place-items-center overflow-hidden rounded-xl border border-white/[0.09] bg-[#0a0f1d]">
                       <div
                         aria-hidden
                         className="absolute inset-0 opacity-25 transition-opacity duration-500 group-hover:opacity-50"
@@ -149,6 +213,16 @@ export default function Certifications() {
                 <p className="mt-2 font-mono text-[11px] text-muted">
                   {c.issuer} · {c.date}
                 </p>
+
+                {/* Atenuado de cards laterales (controlado por el coverflow) */}
+                <div
+                  aria-hidden
+                  ref={(el) => {
+                    dimRefs.current[i] = el;
+                  }}
+                  className="pointer-events-none absolute inset-0 rounded-[inherit] bg-[#04060c]"
+                  style={{ opacity: 0 }}
+                />
               </article>
             );
           })}

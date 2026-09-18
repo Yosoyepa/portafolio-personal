@@ -1,123 +1,67 @@
 "use client";
 
-import { useRef } from "react";
-import dynamic from "next/dynamic";
-import gsap from "gsap";
-import { ScrollTrigger } from "gsap/ScrollTrigger";
-import { useGSAP } from "@gsap/react";
-import { useReducedMotion } from "motion/react";
-import { ArrowDown } from "@phosphor-icons/react";
+import { useEffect, useRef, useState } from "react";
+import { animate, stagger, useInView, useReducedMotion } from "motion/react";
+import { ArrowDown, ArrowUpRight, Pause, Play } from "@phosphor-icons/react";
 import { useLang } from "@/components/providers/LanguageProvider";
 import { scrollToId } from "@/lib/utils";
-
-const ParticleField = dynamic(() => import("@/components/ParticleField"), { ssr: false });
-const TextType = dynamic(() => import("@/components/reactbits/TextType"), { ssr: false });
-import SpotlightReveal from "@/components/SpotlightReveal";
-
-gsap.registerPlugin(ScrollTrigger, useGSAP);
+import SignalField from "@/components/SignalField";
+import StarField from "@/components/StarField";
 
 export default function Hero() {
-  const { t } = useLang();
-  const sectionRef = useRef<HTMLElement>(null);
-  const canvasWrapRef = useRef<HTMLDivElement>(null);
-  const reduce = useReducedMotion() ?? false;
+  const { t, lang } = useLang();
+  const ui = t.hero;
+  const section = useRef<HTMLElement>(null);
+  const reduce = useReducedMotion();
+  const visible = useInView(section);
+  const [tabVisible, setTabVisible] = useState(true);
+  const [paused, setPaused] = useState(false);
+  const [stage, setStage] = useState(1);
+  useEffect(() => {
+    const sync = () => setTabVisible(!document.hidden);
+    sync(); document.addEventListener("visibilitychange", sync);
+    return () => document.removeEventListener("visibilitychange", sync);
+  }, []);
+  const playing = !paused && reduce === false && visible && tabVisible;
+  useEffect(() => {
+    if (reduce !== false) return;
+    const nodes = section.current?.querySelectorAll<HTMLElement>(".signal-enter");
+    if (!nodes?.length) return;
+    const entrance = animate(nodes, { y: [22, 0], opacity: [0, 1] }, {
+      duration: 0.8,
+      delay: stagger(0.09),
+      ease: [0.22, 1, 0.36, 1],
+    });
+    return () => entrance.stop();
+  }, [reduce]);
 
-  // Intro GSAP + parallax del canvas (useGSAP: cleanup automático y scope)
-  useGSAP(
-    () => {
-      if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
-
-      const tl = gsap.timeline({ defaults: { ease: "power4.out" }, delay: 0.15 });
-      tl.fromTo(
-        ".hero-word",
-        { yPercent: 118 },
-        { yPercent: 0, duration: 1.15, stagger: 0.09 },
-      ).fromTo(
-        ".hero-fade",
-        { y: 18, autoAlpha: 0 },
-        { y: 0, autoAlpha: 1, duration: 0.8, stagger: 0.09 },
-        "-=0.65",
-      );
-
-      if (canvasWrapRef.current) {
-        gsap.to(canvasWrapRef.current, {
-          yPercent: 16,
-          ease: "none",
-          scrollTrigger: {
-            trigger: sectionRef.current,
-            start: "top top",
-            end: "bottom top",
-            scrub: true,
-          },
-        });
-      }
-    },
-    { scope: sectionRef },
-  );
-
-  const words = [t.hero.firstName, t.hero.lastName];
-
-  return (
-    <section
-      ref={sectionRef}
-      id="inicio"
-      className="relative flex min-h-[100dvh] items-center overflow-hidden"
-    >
-      {/* Fondo: constelación revelada por cursor → esfera 3D */}
-      <div ref={canvasWrapRef} className="absolute inset-0 overflow-hidden">
-        <SpotlightReveal />
-        <ParticleField />
-      </div>
-      <div className="pointer-events-none absolute -left-40 top-1/4 size-[480px] rounded-full bg-cyan/10 blur-[130px]" />
-      <div className="pointer-events-none absolute -right-40 bottom-0 size-[520px] rounded-full bg-violet/10 blur-[140px]" />
-
-      <div className="relative z-10 mx-auto w-full max-w-6xl px-6 pb-20 pt-28">
-        <p className="hero-fade mb-6 flex items-center gap-2.5 font-mono text-xs tracking-[0.22em] text-muted uppercase">
-          <span className="size-2 rounded-full bg-cyan animate-pulse-dot" />
-          {t.hero.kicker}
-        </p>
-
-        <h1 className="font-display text-[clamp(3.4rem,10vw,7.5rem)] leading-[0.93] font-extrabold tracking-tight">
-          <span className="block overflow-hidden pb-1">
-            <span className="hero-word block">{words[0]}</span>
-          </span>
-          <span className="block overflow-hidden pb-2">
-            <span className="hero-word text-gradient block">{words[1]}</span>
-          </span>
-        </h1>
-
-        <div className="hero-fade mt-7 flex h-7 items-center font-mono text-sm text-cyan sm:text-base">
-          <span className="mr-2 select-none text-violet">▸</span>
-          {reduce ? (
-            t.hero.roles[0]
-          ) : (
-            <TextType
-              text={t.hero.roles}
-              as="span"
-              typingSpeed={42}
-              deletingSpeed={26}
-              pauseDuration={1900}
-              initialDelay={900}
-              cursorCharacter="▌"
-              cursorClassName="text-violet"
-            />
-          )}
+  return <section id="inicio" ref={section} className="signal-hero">
+    <StarField playing={playing} interactive={reduce === false} />
+    <div className="hero-nebula" aria-hidden="true" />
+    <div className="signal-layout">
+      <div className="signal-copy">
+        <p className="signal-eyebrow signal-enter"><span />JUAN ANDRADE <span className="signal-eyebrow-divider">/</span> SENIOR AI ENGINEER</p>
+        <h1 className="signal-title signal-enter">{ui.lines[0]}<br />{ui.lines[1]}<br /><span>{ui.lines[2]}</span></h1>
+        <p className="signal-description signal-enter">{ui.intro}</p>
+        <div className="signal-actions signal-enter">
+          <a href="#proyectos" className="btn-primary" onClick={e => { e.preventDefault(); scrollToId("#proyectos"); }}>{ui.work}<ArrowDown size={17} aria-hidden /></a>
+          <a href="#contacto" className="signal-contact" onClick={e => { e.preventDefault(); scrollToId("#contacto"); }}>{ui.contact}<ArrowUpRight size={17} aria-hidden /></a>
         </div>
-
-        <p className="hero-fade mt-6 max-w-xl text-base leading-relaxed text-muted sm:text-lg">
-          {t.hero.tagline}
-        </p>
-
-        <div className="hero-fade mt-9 flex flex-wrap items-center gap-4">
-          <button onClick={() => scrollToId("#proyectos")} className="btn-primary active:scale-[0.98]">
-            {t.hero.ctaPrimary}
-            <ArrowDown size={15} weight="bold" aria-hidden />
-          </button>
-          <button onClick={() => scrollToId("#contacto")} className="btn-ghost active:scale-[0.98]">
-            {t.hero.ctaSecondary}
-          </button>
-        </div>
+        <div className="signal-proof signal-enter">{ui.proof.map((text, i) => <span key={text}><small>0{i + 1}</small>{text}</span>)}</div>
       </div>
-    </section>
-  );
+      <div className="signal-art">
+        <div className="signal-art-header"><span>{lang === "es" ? "UNA CONSTELACIÓN, UN SISTEMA" : "ONE CONSTELLATION, ONE SYSTEM"}</span><span aria-hidden>FIG. 01</span></div>
+        <SignalField playing={playing} interactive={reduce === false} stage={stage} english={lang === "en"} />
+        <div className="signal-art-caption">
+          <p>{ui.caption}</p>
+          <div className="signal-stages" role="group" aria-label={ui.caption}>
+            {ui.stages.map((label, i) => <button key={label} type="button" aria-pressed={stage === i} onClick={() => setStage(i)}><span>0{i + 1}</span>{label}</button>)}
+          </div>
+          <p className="signal-stage-detail" aria-live="polite">{ui.details[stage]}</p>
+        </div>
+        <div className="signal-art-footer"><span>{ui.hint}</span>{!reduce && <button type="button" onClick={() => setPaused(v => !v)} aria-label={lang === "es" ? (paused ? "Reproducir fondo animado" : "Pausar fondo animado") : (paused ? "Play animated background" : "Pause animated background")}>{paused ? <Play size={13} aria-hidden /> : <Pause size={13} aria-hidden />}{lang === "es" ? "Movimiento" : "Motion"}</button>}</div>
+      </div>
+    </div>
+    <div className="signal-bottom"><span><i />{ui.current}</span><span className="signal-location">{ui.place}</span><a href="#perfil" onClick={e => { e.preventDefault(); scrollToId("#perfil"); }}>{ui.scroll}<ArrowDown size={14} aria-hidden /></a></div>
+  </section>;
 }

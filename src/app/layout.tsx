@@ -1,11 +1,11 @@
 import type { Metadata, Viewport } from "next";
-import { Geist, JetBrains_Mono, Syne } from "next/font/google";
+import { Geist, JetBrains_Mono, Space_Grotesk } from "next/font/google";
 import "./globals.css";
+import "./portfolio.css";
 
-const syne = Syne({
+const spaceGrotesk = Space_Grotesk({
   subsets: ["latin"],
-  weight: ["600", "700", "800"],
-  variable: "--font-syne",
+  variable: "--font-space-grotesk",
   display: "swap",
 });
 
@@ -25,7 +25,7 @@ const jetbrains = JetBrains_Mono({
 export const metadata: Metadata = {
   title: "Juan Andrade | Senior AI Engineer",
   description:
-    "Portafolio de Juan Carlos Andrade Unigarro: Senior AI Engineer especializado en IA generativa sobre AWS, arquitectura de agentes, LLMOps, observabilidad e infraestructura serverless con CDK.",
+    "Juan Carlos Andrade Unigarro, Senior AI Engineer. Agentes de IA, inteligencia documental, backend y plataformas AWS. Explora mi trayectoria y seis proyectos con código público.",
   keywords: [
     "AI Engineer",
     "Generative AI",
@@ -67,9 +67,13 @@ export default function RootLayout({
     <html
       lang="es"
       suppressHydrationWarning
-      className={`${syne.variable} ${geist.variable} ${jetbrains.variable}`}
+      className={`${spaceGrotesk.variable} ${geist.variable} ${jetbrains.variable}`}
     >
       <body>
+        {/* El fondo del hero es el elemento LCP: se descubre tarde como background-image,
+            así que se precarga por adelantado (variante móvil y desktop). */}
+        <link rel="preload" as="image" href="/assets/nebula-blue.webp" media="(min-width: 641px)" fetchPriority="high" />
+        <link rel="preload" as="image" href="/assets/nebula-blue-mobile.webp" media="(max-width: 640px)" fetchPriority="high" />
         <script dangerouslySetInnerHTML={{ __html: noFouc }} />
         {children}
       </body>

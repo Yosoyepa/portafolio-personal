@@ -1,5 +1,8 @@
 "use client";
 
+import { useEffect, useRef, useState } from "react";
+import { useInView, useReducedMotion } from "motion/react";
+
 import {
   Brain,
   Cloud,
@@ -52,13 +55,23 @@ const ITEMS: { label: string; icon: Icon }[] = [
 ];
 
 export default function Marquee() {
+  const ref = useRef<HTMLDivElement>(null);
+  const visible = useInView(ref);
+  const reduce = useReducedMotion();
+  const [tabVisible, setTabVisible] = useState(true);
+  useEffect(() => {
+    const update = () => setTabVisible(!document.hidden);
+    update(); document.addEventListener("visibilitychange", update);
+    return () => document.removeEventListener("visibilitychange", update);
+  }, []);
   const row = [...ITEMS, ...ITEMS];
   return (
     <div
+      ref={ref}
       aria-hidden
       className="relative border-y border-white/[0.06] bg-panel/60 py-5 marquee-mask overflow-hidden"
     >
-      <div className="flex w-max animate-marquee items-center gap-3 pr-3">
+      <div className="flex w-max animate-marquee items-center gap-3 pr-3" style={{ animationPlayState: visible && tabVisible && !reduce ? "running" : "paused" }}>
         {row.map((item, i) => (
           <span
             key={`${item.label}-${i}`}

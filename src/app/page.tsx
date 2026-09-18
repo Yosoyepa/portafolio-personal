@@ -15,7 +15,7 @@ export default function Home() {
   return (
     <AppProviders>
       <Navbar />
-      <main id="contenido">
+      <main id="contenido" className="portfolio-universe">
         <Hero />
         <Marquee />
         <Metrics />

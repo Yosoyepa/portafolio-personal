@@ -1,46 +1,40 @@
 "use client";
 
-import { useRef } from "react";
-import gsap from "gsap";
-import { ScrollTrigger } from "gsap/ScrollTrigger";
-import { useGSAP } from "@gsap/react";
+import { useEffect, useRef } from "react";
+import { animate, useInView, useReducedMotion } from "motion/react";
 import { useLang } from "@/components/providers/LanguageProvider";
-
-gsap.registerPlugin(ScrollTrigger, useGSAP);
 
 export default function Metrics() {
   const { t } = useLang();
   const ref = useRef<HTMLDivElement>(null);
+  const inView = useInView(ref, { margin: "0px 0px -10% 0px", once: true });
+  const reduce = useReducedMotion();
 
-  useGSAP(
-    () => {
-      ref.current?.querySelectorAll<HTMLElement>("[data-count]").forEach((el) => {
-        const target = Number(el.dataset.count ?? "0");
-        if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
-          el.textContent = String(target);
-          return;
-        }
-        const state = { v: 0 };
-        gsap.to(state, {
-          v: target,
-          duration: 1.6,
-          ease: "power2.out",
-          snap: { v: 1 },
-          scrollTrigger: { trigger: el, start: "top 90%", once: true },
-          onUpdate: () => {
-            el.textContent = String(Math.round(state.v));
-          },
-        });
-      });
-    },
-    { scope: ref },
-  );
+  // Los contadores se crean solo cuando la franja entra en pantalla;
+  // nada de trabajo de animación durante la carga inicial.
+  useEffect(() => {
+    if (!inView) return;
+    const counters = ref.current?.querySelectorAll<HTMLElement>("[data-count]");
+    if (!counters?.length) return;
+    if (reduce) {
+      counters.forEach((el) => { el.textContent = String(Number(el.dataset.count ?? "0")); });
+      return;
+    }
+    const running = Array.from(counters).map((el) =>
+      animate(0, Number(el.dataset.count ?? "0"), {
+        duration: 1.6,
+        ease: [0.33, 1, 0.68, 1],
+        onUpdate: (v) => { el.textContent = String(Math.round(v)); },
+      }),
+    );
+    return () => running.forEach((controls) => controls.stop());
+  }, [inView, reduce]);
 
   return (
-    <div ref={ref} className="border-b border-white/[0.06] bg-panel/50">
-      <div className="mx-auto grid w-full max-w-6xl grid-cols-2 gap-y-10 px-6 py-14 md:grid-cols-4">
+    <div ref={ref} className="relative isolate overflow-hidden border-b border-white/[0.06] bg-panel/50">
+      <div className="relative mx-auto grid w-full max-w-6xl grid-cols-2 gap-y-10 px-6 py-14 md:grid-cols-4">
         {t.metrics.items.map((m) => (
-          <div key={m.label} data-reveal className="text-center">
+          <div key={m.value} data-reveal className="text-center">
             <p className="font-display text-4xl font-extrabold tracking-tight sm:text-5xl">
               <span data-count={m.value}>0</span>
               <span className="text-cyan">{m.suffix}</span>

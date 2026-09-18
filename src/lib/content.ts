@@ -1,3 +1,6 @@
+import { caseStudies } from "./caseStudies.ts";
+import career from "./career.ts";
+
 /**
  * Contenido bilingüe (ES/EN) del portafolio de Juan Carlos Andrade Unigarro.
  * Editar este archivo para actualizar textos; ambas variantes deben tener la misma forma.
@@ -7,11 +10,11 @@
 export type Lang = "es" | "en";
 
 // ─────────────────────────────────────────────────────────────────────────────
-// Datos de contacto — TODO: reemplaza los placeholders con tus datos reales.
+// Datos de contacto
 // ─────────────────────────────────────────────────────────────────────────────
 export const GITHUB_URL = "https://github.com/Yosoyepa";
-export const EMAIL = "tu.correo@ejemplo.com"; // TODO: tu correo real
-export const LINKEDIN_URL = "https://www.linkedin.com/in/tu-usuario"; // TODO: tu usuario real
+export const EMAIL = "andradeunigarrojuancarlos@gmail.com";
+export const LINKEDIN_URL = "https://www.linkedin.com/in/juan-carlos-andrade-unigarro/";
 
 const es = {
   nav: {
@@ -25,19 +28,13 @@ const es = {
     contact: "Contacto",
   },
   hero: {
-    kicker: "Senior AI Engineer · Bogotá / Pasto, Colombia",
-    firstName: "Juan",
-    lastName: "Andrade",
-    roles: [
-      "IA generativa en producción",
-      "Arquitectura de agentes sobre AWS",
-      "LLMOps y observabilidad",
-      "Cloud serverless & FinOps",
-    ],
-    tagline:
-      "Diseño sistemas agénticos de IA generativa y la infraestructura AWS serverless que los lleva a producción.",
-    ctaPrimary: "Ver proyectos",
-    ctaSecondary: "Contactarme",
+    lines: ["De una idea", "a un sistema", "que funciona."],
+    intro: "Soy Juan Andrade. Conecto agentes de IA, ingeniería de software y cloud para llevar productos a producción.",
+    work: "Explorar mi trabajo", contact: "Contactarme", current: "Actualmente en Inetum", place: "Colombia · Disponible para conectar",
+    caption: "Datos que conectan. Agentes que actúan.", hint: "Activa una conexión y sigue la señal.",
+    stages: ["Contexto", "Inteligencia", "Producción"],
+    details: ["Datos, retrieval y memoria: la información que un agente necesita para actuar.", "Modelos, herramientas y reglas: decisiones dentro de un sistema controlado.", "Infraestructura, evaluación y trazas: lo que permite operarlo cada día."],
+    proof: ["Agentes & RAG", "Inteligencia documental", "AWS & plataformas"], scroll: "Conoce cómo trabajo",
   },
   metrics: {
     items: [
@@ -49,12 +46,12 @@ const es = {
   },
   about: {
     kicker: "PERFIL",
-    title: "Ingeniero híbrido: IA generativa + Cloud",
+    title: "De los modelos al sistema completo.",
     ghost: "PERFIL",
     paragraphs: [
-      "No soy un científico de datos que deja scripts sueltos, ni un DevOps que solo levanta servidores: soy ingeniero de software. Aplico patrones estrictos (Clean Architecture, Hexagonal, SOLID) para construir plataformas de IA resilientes, observables, seguras y listas para el nivel enterprise.",
-      "Actualmente soy Senior AI Engineer en Inetum Colombia. Antes, en Blend360 LATAM, pasé del programa de semillero al equipo core de producto en solo dos meses, donde llevé sistemas multi-agente sobre Amazon Bedrock a producción junto con pipelines de observabilidad para LLMs y despliegues serverless con AWS CDK.",
-      "Estudio Ingeniería de Sistemas y Computación en la Universidad Nacional de Colombia, tengo inglés profesional (B2) y una obsesión clara: convertir requisitos complejos en arquitecturas escalables y eficientes en costo.",
+      "Conecto IA, backend e infraestructura para construir productos que se puedan desplegar, observar y mantener. Me involucro desde la arquitectura hasta los detalles que hacen fiable una entrega.",
+      "Hoy trabajo en inteligencia documental en Inetum. Antes, en Blend360, desarrollé agentes sobre Bedrock, observabilidad de LLMs y plataformas de despliegue con AWS CDK. En mis proyectos públicos exploro cómo darle control y evidencia al software que usa IA.",
+      "Estudio Ingeniería de Sistemas y Computación en la Universidad Nacional de Colombia. Trabajo en español e inglés (B2), con atención a la calidad, la seguridad y el coste de operación.",
     ],
     highlights: [
       { title: "Arquitectura de agentes IA", desc: "Sistemas multi-agente con Strands Agents SDK, clasificación de intención, tool use y MCP." },
@@ -62,7 +59,7 @@ const es = {
       { title: "RAG engineering", desc: "Pipelines con OpenSearch, pgvector, reranking, memoria persistente y evaluación con Ragas." },
       { title: "Observabilidad de IA", desc: "Trazabilidad distribuida de agentes (grafos, nodos, edges) con Kinesis y patrón fail-silent." },
       { title: "IaC con AWS CDK", desc: "Stacks completos en TypeScript y Python: ECS Fargate, Lambda, DynamoDB, OpenSearch." },
-      { title: "FinOps & zero-cost", desc: "Topologías Free Tier sin NAT Gateway, presupuestos con alertas y arquitectura de coste cero." },
+      { title: "FinOps & eficiencia", desc: "Entornos efímeros, presupuestos con alertas y decisiones de arquitectura que evitan costes innecesarios." },
     ],
     education: {
       degree: "Ingeniería de Sistemas y Computación",
@@ -74,46 +71,7 @@ const es = {
   experience: {
     kicker: "TRAYECTORIA",
     title: "Experiencia",
-    jobs: [
-      {
-        company: "Inetum Colombia S.A.S",
-        role: "Senior AI Engineer · Especialista Técnico Senior",
-        period: "Jul 2026 – Presente",
-        location: "Bogotá · Híbrido",
-        current: true,
-        bullets: [
-          "Soluciones enterprise de IA aplicada, cloud y sistemas distribuidos dentro de programas de transformación digital.",
-          "Operación con mentalidad de seguridad e incident response, complementada con la microcredencial AWS Incident Response Demonstrated.",
-          "Arquitectura y entrega técnica en iniciativas Data & AI para clientes corporativos.",
-        ],
-      },
-      {
-        company: "Blend360 LATAM",
-        role: "Cloud & AI Engineer · Backend Engineer (equipo core de producto)",
-        period: "Mar 2025 – Jun 2026",
-        location: "Bogotá · Híbrido",
-        current: false,
-        bullets: [
-          "Promovido al equipo core de producto a solo 2 meses de ingresar al programa de semillero.",
-          "Integré la observabilidad de agentes (trazas distribuidas con Kinesis/DynamoDB/S3, patrón fail-silent) en una plataforma GenAI basada en LangChain, sin modificar su núcleo.",
-          "Refactoricé el orquestador multi-agente: clasificador de intención con Strands Agents SDK + chain-of-thought y trazas padre-hijo deterministas.",
-          "Construí una librería hexagonal de extracción PDF→JSON con Bedrock Function Calling: chunking adaptativo, concurrencia async y tracking de costos por modelo.",
-          "Desarrollé en solitario la plataforma Apache Airflow 3 sobre ECS Fargate (5 servicios ECS) con infraestructura CDK, Keycloak OIDC y autoscaling.",
-          "Contribuidor #1 del instalador que provisiona automáticamente 16+ componentes de IA en cuentas AWS de clientes (156 commits).",
-          "Capacitador técnico interno del equipo de producto (chatbot RAG) y miembro del equipo en el bootcamp AWS GenAI Ignite en las oficinas de AWS Bogotá.",
-        ],
-      },
-      {
-        company: "Blend360 LATAM",
-        role: "Data Analyst Trainee · Programa semillero All-Star",
-        period: "Dic 2024 – Mar 2025",
-        location: "Bogotá",
-        current: false,
-        bullets: [
-          "Ingreso por el programa de semillero; promoción temprana validada por los directores de Arquitectura y de AWS Practice.",
-        ],
-      },
-    ],
+    jobs: career.es,
   },
   projects: {
     kicker: "PROYECTOS",
@@ -121,35 +79,7 @@ const es = {
     viewProject: "Ver en GitHub",
     enterpriseNote:
       "Además: plataformas de IA generativa, orquestadores multi-agente y automatización de despliegue construidos para clientes enterprise. El detalle técnico está bajo acuerdo de confidencialidad.",
-    items: [
-      {
-        name: "Secret Oracle",
-        year: "2026",
-        award: "Ganador · Hackathon AWS Community Day Colombia",
-        description:
-          "Juego conversacional serverless donde una IA guarda una imagen secreta, entrega pistas crípticas generadas con Amazon Bedrock y valida los intentos del jugador con visión computacional.",
-        tech: ["AWS Lambda", "Bedrock", "Rekognition", "DynamoDB", "S3", "CDK (Python)", "FinOps"],
-        link: "https://github.com/Yosoyepa",
-      },
-      {
-        name: "BioStock Cloud Infra",
-        year: "2026",
-        award: null,
-        description:
-          "Arquitectura e-commerce event-driven de coste cero: 6 microservicios definidos con AWS CDK en Python, stacks DDD modulares, fan-out SNS + SQS y topología 100% Free Tier sin NAT Gateway.",
-        tech: ["AWS CDK", "Event-Driven", "ECS", "Lambda", "SNS/SQS", "IAM/SSO", "Budgets"],
-        link: "https://github.com/Yosoyepa/BioStock-Systems-Infra",
-      },
-      {
-        name: "CodeGuardAI",
-        year: "2025",
-        award: null,
-        description:
-          "Sistema multi-agente de revisión de código Python con LLMs: análisis de seguridad, calidad y performance sobre FastAPI + Clean Architecture, WebSockets en tiempo real y servidores MCP.",
-        tech: ["FastAPI", "Clean Architecture", "Gemini", "MCP", "WebSockets", "Docker", "PostgreSQL"],
-        link: "https://github.com/Yosoyepa/CodeGuardAI",
-      },
-    ],
+    items: caseStudies("es"),
   },
   skills: {
     kicker: "STACK",
@@ -160,7 +90,7 @@ const es = {
       { name: "RAG & Datos", items: ["OpenSearch", "Bedrock Knowledge Bases", "pgvector", "Ragas", "sentence-transformers", "Airflow"] },
       { name: "Backend", items: ["FastAPI", "Spring Boot", "Pydantic v2", "WebSockets", "Patrón BFF", "SQS / SNS"] },
       { name: "Cloud & IaC", items: ["AWS CDK v2", "CloudFormation", "ECS Fargate", "Lambda", "DynamoDB", "RDS", "S3 / EFS", "Kinesis", "CloudFront"] },
-      { name: "DevOps & Calidad", items: ["CodePipeline / CodeBuild", "GitHub Actions", "Docker", "ECR", "Keycloak / Cognito", "OpenTelemetry", "FinOps", "Tests > 94%"] },
+      { name: "DevOps & Calidad", items: ["CodePipeline / CodeBuild", "GitHub Actions", "Docker", "ECR", "Keycloak / Cognito", "OpenTelemetry", "FinOps", "pytest / Mutation testing"] },
     ],
   },
   certs: {
@@ -173,8 +103,9 @@ const es = {
         name: "AWS · Certificaciones base",
         items: [
           { name: "AWS Certified Data Engineer Associate", issuer: "Amazon Web Services", date: "2025 – 2028" },
-          { name: "AWS Certified AI Practitioner + Early Adopter", issuer: "Amazon Web Services", date: "2025" },
+          { name: "AWS Certified AI Practitioner", issuer: "Amazon Web Services", date: "2025" },
           { name: "AWS Certified Cloud Practitioner", issuer: "Amazon Web Services", date: "2025" },
+          { name: "AWS AI Practitioner Early Adopter", issuer: "Amazon Web Services", date: "2025" },
         ],
       },
       {
@@ -199,9 +130,9 @@ const es = {
   },
   contact: {
     kicker: "CONTACTO",
-    title: "Construyamos algo memorable.",
-    text: "Abierto a colaboraciones, roles senior de IA aplicada y retos cloud-native. Respondo rápido y trabajo en español o inglés.",
-    availability: "Disponible · Bogotá (híbrido/presencial) · Remoto global",
+    title: "Tu próximo reto, una buena conversación.",
+    text: "¿Un agente que necesita llegar a producción, un flujo documental o una plataforma cloud? Cuéntame el problema, el contexto y qué te gustaría lograr.",
+    availability: "Bogotá / Pasto, Colombia · Colaboraciones y oportunidades remotas",
     emailLabel: "Email",
     githubLabel: "GitHub",
     linkedinLabel: "LinkedIn",
@@ -225,19 +156,13 @@ const en: typeof es = {
     contact: "Contact",
   },
   hero: {
-    kicker: "Senior AI Engineer · Bogotá / Pasto, Colombia",
-    firstName: "Juan",
-    lastName: "Andrade",
-    roles: [
-      "Production Generative AI",
-      "Agentic architectures on AWS",
-      "LLMOps & observability",
-      "Serverless cloud & FinOps",
-    ],
-    tagline:
-      "I design agentic Generative AI systems and the AWS serverless infrastructure that ships them to production.",
-    ctaPrimary: "View projects",
-    ctaSecondary: "Get in touch",
+    lines: ["From an idea", "to a system", "that works."],
+    intro: "I'm Juan Andrade. I connect AI agents, software engineering and cloud to bring products into production.",
+    work: "Explore my work", contact: "Contact me", current: "Currently at Inetum", place: "Colombia · Let's connect",
+    caption: "Connected data. Agents that act.", hint: "Activate a connection. Follow the signal.",
+    stages: ["Context", "Intelligence", "Production"],
+    details: ["Data, retrieval and memory: the information an agent needs to act.", "Models, tools and rules: decisions within a controlled system.", "Infrastructure, evaluation and traces: what keeps it running every day."],
+    proof: ["Agents & RAG", "Document intelligence", "AWS & platforms"], scroll: "Discover how I work",
   },
   metrics: {
     items: [
@@ -249,12 +174,12 @@ const en: typeof es = {
   },
   about: {
     kicker: "ABOUT",
-    title: "Hybrid engineer: Generative AI + Cloud",
+    title: "From models to complete systems.",
     ghost: "ABOUT",
     paragraphs: [
-      "I'm not a data scientist leaving loose scripts behind, nor a DevOps who only spins up servers: I'm a software engineer. I apply strict patterns (Clean Architecture, Hexagonal, SOLID) to build AI platforms that are resilient, observable, secure and ready for the enterprise level.",
-      "Today I'm a Senior AI Engineer at Inetum Colombia. Before that, at Blend360 LATAM, I went from the seed program to the core product team in just two months, taking multi-agent systems on Amazon Bedrock to production along with LLM observability pipelines and serverless deployments with AWS CDK.",
-      "I'm studying Systems and Computing Engineering at Universidad Nacional de Colombia, I have professional English (B2), and one clear obsession: turning complex requirements into scalable, cost-efficient architectures.",
+      "I connect AI, backend and infrastructure to build products that can be deployed, observed and maintained. I work from architecture down to the details that make a delivery reliable.",
+      "Today I work in document intelligence at Inetum. Previously, at Blend360, I developed Bedrock agents, LLM observability and AWS CDK deployment platforms. My public projects explore how to bring control and evidence to software that uses AI.",
+      "I study Systems and Computing Engineering at Universidad Nacional de Colombia. I work in Spanish and English (B2), with attention to quality, security and operating costs.",
     ],
     highlights: [
       { title: "AI agent architecture", desc: "Multi-agent systems with Strands Agents SDK, intent classification, tool use and MCP." },
@@ -262,7 +187,7 @@ const en: typeof es = {
       { title: "RAG engineering", desc: "Pipelines with OpenSearch, pgvector, reranking, persistent memory and Ragas evaluation." },
       { title: "AI observability", desc: "Distributed agent tracing (graphs, nodes, edges) on Kinesis with fail-silent design." },
       { title: "IaC with AWS CDK", desc: "Full stacks in TypeScript and Python: ECS Fargate, Lambda, DynamoDB, OpenSearch." },
-      { title: "FinOps & zero-cost", desc: "Free Tier topologies without NAT Gateway, budget alerts and zero-idle-cost architecture." },
+      { title: "FinOps & efficiency", desc: "Ephemeral environments, budget alerts and architecture decisions that avoid unnecessary costs." },
     ],
     education: {
       degree: "Systems and Computing Engineering",
@@ -274,46 +199,7 @@ const en: typeof es = {
   experience: {
     kicker: "EXPERIENCE",
     title: "Experience",
-    jobs: [
-      {
-        company: "Inetum Colombia S.A.S",
-        role: "Senior AI Engineer · Senior Technical Specialist",
-        period: "Jul 2026 – Present",
-        location: "Bogotá · Hybrid",
-        current: true,
-        bullets: [
-          "Enterprise applied-AI, cloud and distributed systems solutions within digital transformation programs.",
-          "Operating with a security-first, incident-response mindset backed by the AWS Incident Response Demonstrated microcredential.",
-          "Architecture and technical delivery in Data & AI initiatives for corporate clients.",
-        ],
-      },
-      {
-        company: "Blend360 LATAM",
-        role: "Cloud & AI Engineer · Backend Engineer (core product team)",
-        period: "Mar 2025 – Jun 2026",
-        location: "Bogotá · Hybrid",
-        current: false,
-        bullets: [
-          "Promoted to the core product team only 2 months after joining the seed program.",
-          "Integrated agent observability (distributed tracing on Kinesis/DynamoDB/S3, fail-silent pattern) into a LangChain-based GenAI platform without touching its core.",
-          "Refactored the multi-agent orchestrator: intent classifier with Strands Agents SDK + chain-of-thought and deterministic parent-child traces.",
-          "Built a hexagonal PDF→JSON extraction library on Bedrock Function Calling: adaptive chunking, async concurrency and per-model cost tracking.",
-          "Single-handedly developed the Apache Airflow 3 platform on ECS Fargate (5 ECS services) with CDK infrastructure, Keycloak OIDC and autoscaling.",
-          "#1 contributor of the installer that automatically provisions 16+ AI components into client AWS accounts (156 commits).",
-          "Internal technical trainer for the product team (RAG chatbot) and Blend360 team member at the AWS GenAI Ignite bootcamp held at AWS Bogotá offices.",
-        ],
-      },
-      {
-        company: "Blend360 LATAM",
-        role: "Data Analyst Trainee · All-Star seed program",
-        period: "Dec 2024 – Mar 2025",
-        location: "Bogotá",
-        current: false,
-        bullets: [
-          "Joined through the seed program; early promotion validated by the Directors of Architecture and AWS Practice.",
-        ],
-      },
-    ],
+    jobs: career.en,
   },
   projects: {
     kicker: "PROJECTS",
@@ -321,35 +207,7 @@ const en: typeof es = {
     viewProject: "View on GitHub",
     enterpriseNote:
       "Plus: Generative AI platforms, multi-agent orchestrators and deployment automation built for enterprise clients. Technical detail is covered under NDA.",
-    items: [
-      {
-        name: "Secret Oracle",
-        year: "2026",
-        award: "Winner · AWS Community Day Colombia Hackathon",
-        description:
-          "Serverless conversational game where an AI keeps a secret image, hands out cryptic clues generated with Amazon Bedrock and validates player guesses with computer vision.",
-        tech: ["AWS Lambda", "Bedrock", "Rekognition", "DynamoDB", "S3", "CDK (Python)", "FinOps"],
-        link: "https://github.com/Yosoyepa",
-      },
-      {
-        name: "BioStock Cloud Infra",
-        year: "2026",
-        award: null,
-        description:
-          "Zero-cost event-driven e-commerce architecture: 6 microservices defined with AWS CDK in Python, modular DDD stacks, SNS + SQS fan-out and a 100% Free Tier topology without NAT Gateway.",
-        tech: ["AWS CDK", "Event-Driven", "ECS", "Lambda", "SNS/SQS", "IAM/SSO", "Budgets"],
-        link: "https://github.com/Yosoyepa/BioStock-Systems-Infra",
-      },
-      {
-        name: "CodeGuardAI",
-        year: "2025",
-        award: null,
-        description:
-          "Multi-agent code review system for Python using LLMs: security, quality and performance analysis on FastAPI + Clean Architecture, real-time WebSockets and MCP servers.",
-        tech: ["FastAPI", "Clean Architecture", "Gemini", "MCP", "WebSockets", "Docker", "PostgreSQL"],
-        link: "https://github.com/Yosoyepa/CodeGuardAI",
-      },
-    ],
+    items: caseStudies("en"),
   },
   skills: {
     kicker: "STACK",
@@ -360,7 +218,7 @@ const en: typeof es = {
       { name: "RAG & Data", items: ["OpenSearch", "Bedrock Knowledge Bases", "pgvector", "Ragas", "sentence-transformers", "Airflow"] },
       { name: "Backend", items: ["FastAPI", "Spring Boot", "Pydantic v2", "WebSockets", "BFF Pattern", "SQS/SNS"] },
       { name: "Cloud & IaC", items: ["AWS CDK v2", "CloudFormation", "ECS Fargate", "Lambda", "DynamoDB", "RDS", "S3 / EFS", "Kinesis", "CloudFront"] },
-      { name: "DevOps & Quality", items: ["CodePipeline / CodeBuild", "GitHub Actions", "Docker", "ECR", "Keycloak / Cognito", "OpenTelemetry", "FinOps", "Tests > 94%"] },
+      { name: "DevOps & Quality", items: ["CodePipeline / CodeBuild", "GitHub Actions", "Docker", "ECR", "Keycloak / Cognito", "OpenTelemetry", "FinOps", "pytest / Mutation testing"] },
     ],
   },
   certs: {
@@ -373,8 +231,9 @@ const en: typeof es = {
         name: "AWS · Core certifications",
         items: [
           { name: "AWS Certified Data Engineer Associate", issuer: "Amazon Web Services", date: "2025 – 2028" },
-          { name: "AWS Certified AI Practitioner + Early Adopter", issuer: "Amazon Web Services", date: "2025" },
+          { name: "AWS Certified AI Practitioner", issuer: "Amazon Web Services", date: "2025" },
           { name: "AWS Certified Cloud Practitioner", issuer: "Amazon Web Services", date: "2025" },
+          { name: "AWS AI Practitioner Early Adopter", issuer: "Amazon Web Services", date: "2025" },
         ],
       },
       {
@@ -399,9 +258,9 @@ const en: typeof es = {
   },
   contact: {
     kicker: "CONTACT",
-    title: "Let's build something memorable.",
-    text: "Open to collaborations, senior applied-AI roles and cloud-native challenges. I reply fast and work in Spanish or English.",
-    availability: "Available · Bogotá (hybrid/on-site) · Global remote",
+    title: "Your next challenge starts with a conversation.",
+    text: "An agent ready for production, a document workflow or a cloud platform? Tell me about the problem, the context and what you want to achieve.",
+    availability: "Bogotá / Pasto, Colombia · Collaborations and remote opportunities",
     emailLabel: "Email",
     githubLabel: "GitHub",
     linkedinLabel: "LinkedIn",

@@ -1,17 +1,21 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { AnimatePresence, motion, useMotionValueEvent, useScroll } from "motion/react";
 import { GithubLogo, LinkedinLogo, List, X } from "@phosphor-icons/react";
 import { useLang } from "@/components/providers/LanguageProvider";
 import { scrollToId } from "@/lib/utils";
+import GooeyNav from "@/components/reactbits/GooeyNav";
+import PortfolioIcon from "@/components/PortfolioIcon";
 import { GITHUB_URL, LINKEDIN_URL } from "@/lib/content";
 
 export default function Navbar() {
   const { t, lang, setLang } = useLang();
   const [scrolled, setScrolled] = useState(false);
   const [open, setOpen] = useState(false);
-  const { scrollY } = useScroll();
+  const [active, setActive] = useState("#inicio");
+  const menuRef = useRef<HTMLButtonElement>(null);
+  const { scrollY, scrollYProgress } = useScroll();
 
   // Progreso de scroll vía Motion (sin listeners de scroll nativos)
   useMotionValueEvent(scrollY, "change", (v) => setScrolled(v > 24));
@@ -20,24 +24,39 @@ export default function Navbar() {
   useEffect(() => {
     if (!open) return;
     const onKey = (e: KeyboardEvent) => {
-      if (e.key === "Escape") setOpen(false);
+      if (e.key === "Escape") {
+        setOpen(false);
+        menuRef.current?.focus();
+      }
     };
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
   }, [open]);
 
+  useEffect(() => {
+    const observer = new IntersectionObserver((entries) => {
+      for (const entry of entries) {
+        if (entry.isIntersecting) setActive(`#${entry.target.id}`);
+      }
+    }, { rootMargin: "-30% 0px -69% 0px" });
+    document.querySelectorAll("main section[id]").forEach((section) => observer.observe(section));
+    return () => observer.disconnect();
+  }, []);
+
   const links = [
-    { label: t.nav.about, href: "#perfil" },
-    { label: t.nav.experience, href: "#experiencia" },
-    { label: t.nav.projects, href: "#proyectos" },
-    { label: t.nav.stack, href: "#stack" },
-    { label: t.nav.certifications, href: "#certificaciones" },
-    { label: t.nav.contact, href: "#contacto" },
+    { label: t.nav.about, href: "#perfil", icon: <PortfolioIcon name="profile" /> },
+    { label: t.nav.experience, href: "#experiencia", icon: <PortfolioIcon name="journey" /> },
+    { label: t.nav.projects, href: "#proyectos", icon: <PortfolioIcon name="projects" /> },
+    { label: t.nav.stack, href: "#stack", icon: <PortfolioIcon name="stack" /> },
+    { label: t.nav.certifications, href: "#certificaciones", icon: <PortfolioIcon name="award" /> },
+    { label: t.nav.contact, href: "#contacto", icon: <PortfolioIcon name="contact" /> },
   ];
 
   const go = (e: React.MouseEvent, href: string) => {
     e.preventDefault();
+    if (open) menuRef.current?.focus({ preventScroll: true });
     setOpen(false);
+    setActive(href);
     scrollToId(href);
   };
 
@@ -49,7 +68,7 @@ export default function Navbar() {
           : "border-b border-transparent bg-transparent"
       }`}
     >
-      <nav aria-label="Principal" className="mx-auto flex h-16 w-full max-w-6xl items-center justify-between px-6">
+      <nav aria-label={lang === "es" ? "Principal" : "Main"} className="mx-auto flex h-18 w-full max-w-7xl items-center justify-between px-6">
         {/* Logo */}
         <a
           href="#inicio"
@@ -60,25 +79,13 @@ export default function Navbar() {
           <span className="grid size-8 place-items-center rounded-lg bg-gradient-to-br from-cyan to-violet font-display text-[13px] font-extrabold text-[#04050a] transition-transform duration-300 group-hover:rotate-[-6deg]">
             JA
           </span>
-          <span className="hidden font-mono text-xs tracking-widest text-muted sm:block">
+          <span className="hidden font-mono text-xs tracking-widest text-muted xl:block">
             juan·andrade
           </span>
         </a>
 
         {/* Links desktop */}
-        <ul className="hidden items-center gap-6 lg:flex">
-          {links.map((l) => (
-            <li key={l.href}>
-              <a
-                href={l.href}
-                onClick={(e) => go(e, l.href)}
-                className="text-[13px] text-muted transition-colors duration-200 hover:text-fg"
-              >
-                {l.label}
-              </a>
-            </li>
-          ))}
-        </ul>
+        <GooeyNav items={links} activeHref={active} onNavigate={go} className="hidden lg:block" />
 
         <div className="flex items-center gap-3">
           {/* Toggle idioma */}
@@ -88,7 +95,7 @@ export default function Navbar() {
                 key={code}
                 onClick={() => setLang(code)}
                 aria-pressed={lang === code}
-                className={`relative rounded-full px-3 py-1.5 font-mono text-[11px] uppercase tracking-wider transition-colors ${
+                className={`relative min-h-10 rounded-full px-3 py-1.5 font-mono text-[11px] uppercase tracking-wider transition-colors ${
                   lang === code ? "text-[#04050a]" : "text-muted hover:text-fg"
                 }`}
               >
@@ -128,39 +135,32 @@ export default function Navbar() {
 
           {/* Menú móvil */}
           <button
+            ref={menuRef}
             onClick={() => setOpen((v) => !v)}
             aria-expanded={open}
-            aria-label={open ? "Cerrar menú" : "Abrir menú"}
-            className="grid size-10 place-items-center rounded-full text-muted hover:bg-white/5 hover:text-fg lg:hidden"
+            aria-controls="mobile-navigation"
+            aria-label={lang === "es" ? (open ? "Cerrar menú" : "Abrir menú") : (open ? "Close menu" : "Open menu")}
+            className="grid size-11 place-items-center rounded-full text-muted hover:bg-white/5 hover:text-fg lg:hidden"
           >
             {open ? <X size={20} aria-hidden /> : <List size={20} aria-hidden />}
           </button>
         </div>
       </nav>
 
+      <motion.div aria-hidden="true" className="nav-reading-progress" style={{ scaleX: scrollYProgress }} />
+
       {/* Panel móvil */}
       <AnimatePresence>
         {open && (
           <motion.div
+            id="mobile-navigation"
             initial={{ opacity: 0, height: 0 }}
             animate={{ opacity: 1, height: "auto" }}
             exit={{ opacity: 0, height: 0 }}
             transition={{ duration: 0.32, ease: [0.22, 1, 0.36, 1] }}
             className="overflow-hidden border-b border-white/[0.06] bg-bg/95 backdrop-blur-xl lg:hidden"
           >
-            <ul className="space-y-1 px-6 py-5">
-              {links.map((l) => (
-                <li key={l.href}>
-                  <a
-                    href={l.href}
-                    onClick={(e) => go(e, l.href)}
-                    className="block w-full rounded-lg px-3 py-3 text-left text-sm text-muted transition-colors hover:bg-white/5 hover:text-fg"
-                  >
-                    {l.label}
-                  </a>
-                </li>
-              ))}
-            </ul>
+            <GooeyNav items={links} activeHref={active} onNavigate={go} className="gooey-nav--mobile mx-6 my-5" />
           </motion.div>
         )}
       </AnimatePresence>

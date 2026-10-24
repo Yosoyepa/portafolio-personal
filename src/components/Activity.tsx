@@ -6,7 +6,7 @@ import { ArrowUpRight, GithubLogo } from "@phosphor-icons/react";
 import SectionHeading from "@/components/SectionHeading";
 import AmbientBackground from "@/components/AmbientBackground";
 import BorderGlow from "@/components/reactbits/BorderGlow";
-import AsciiPortrait from "@/components/ui/ascii-portrait";
+import AsciiPlanet from "@/components/ui/ascii-planet";
 import { ActivityHeatmap, RollingNumber, type ActivityHeatmapStrings } from "@/components/ui/activity-heatmap";
 import { useLang } from "@/components/providers/LanguageProvider";
 import { GITHUB_URL } from "@/lib/content";
@@ -25,7 +25,7 @@ const LABELS = {
     unit: { one: "contribución", other: "contribuciones" }, day: { one: "día", other: "días" }, none: "sin contribuciones",
     stats: ["Contribuciones", "Días activos", "Racha más larga", "Día récord"], inPeriod: (period: string) => `en ${period}`, ofDays: (days: string) => `de ${days} días`,
     rhythm: "Ritmo mensual", peak: "pico", empty: "Selecciona un día para ver su registro.", locale: "es-CO",
-    portraitAlt: "Retrato de Juan Andrade dibujado con caracteres ASCII",
+    planetAlt: "Planeta con anillos dibujado con caracteres ASCII",
   },
   en: {
     kicker: "ACTIVITY", title: "Code that keeps shipping.",
@@ -35,7 +35,7 @@ const LABELS = {
     unit: { one: "contribution", other: "contributions" }, day: { one: "day", other: "days" }, none: "no contributions",
     stats: ["Contributions", "Active days", "Longest streak", "Record day"], inPeriod: (period: string) => `in ${period}`, ofDays: (days: string) => `of ${days} days`,
     rhythm: "Monthly rhythm", peak: "peak", empty: "Select a day to see its log.", locale: "en-US",
-    portraitAlt: "Portrait of Juan Andrade drawn in ASCII characters",
+    planetAlt: "Ringed planet drawn in ASCII characters",
   },
 };
 
@@ -48,8 +48,6 @@ const ES_STRINGS: Partial<ActivityHeatmapStrings> = {
 const EN_STRINGS: Partial<ActivityHeatmapStrings> = { legend: "Brighter squares mean more" };
 
 const TYPE_MS = 18, ERASE_MS = 9;
-/** Columns of the ASCII portrait: enough for the face to read as a likeness in a ~270 px frame. */
-const PORTRAIT_COLS = 96;
 /** The range sweep recolors the grid for about 740 ms; the commit pulse waits for it. */
 const SWEEP_MS = 760, PULSE_MS = 900;
 const DAY = 86_400_000;
@@ -254,9 +252,9 @@ function ProfileCard({ lang }: { lang: "es" | "en" }) {
   return (
     <BorderGlow className="gh-card gh-profile">
       <div className="gh-frame">
-        <p className="gh-frame-bar"><span>~/yosoyepa $</span> cat avatar.txt</p>
+        <p className="gh-frame-bar"><span>~/yosoyepa $</span> ./orbit --live</p>
         <div className="gh-avatar">
-          <AsciiPortrait src="/assets/juan-portrait-square.webp" alt={ui.portraitAlt} cols={PORTRAIT_COLS} />
+          <AsciiPlanet label={ui.planetAlt} />
         </div>
       </div>
       <div className="gh-identity">

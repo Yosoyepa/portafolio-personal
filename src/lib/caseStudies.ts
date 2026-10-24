@@ -1,4 +1,4 @@
-/** Public repository evidence, reviewed 2026-09-07 (Ommatix and CloudPath: 2026-10-24). See docs/portfolio-evidence.md. */
+/** Public repository evidence, reviewed 2026-09-07 (Ommatix, CloudPath and TryTrust: 2026-10-24). See docs/portfolio-evidence.md. */
 export type ProjectCategory = "agents" | "cloud" | "tooling";
 type Story = { name: string; headline: string; description: string; status: string; proof: string; details: string[]; award: string | null };
 type CaseStudy = { id: string; year: string; category: ProjectCategory; tech: string[]; link: string; flow: string[]; featured?: boolean; es: Story; en: Story };
@@ -36,6 +36,23 @@ const cases: CaseStudy[] = [
       description: "A voice copilot for AWS Cloud Practitioner prep: it interviews the student in real time, finds their gaps and builds a learning map that recalibrates after each micro-lesson and explains why it changed with official AWS sources.",
       status: "Hackathon · Open source", proof: "Real-time voice and a path that adapts", award: "3rd place · Platanus Build Night 2026, Bogotá",
       details: ["Voice interview with Gemini Live and a single-use ephemeral token, with microphone consent and a written alternative.", "FastAPI API deployed on Railway: profile, lesson and adaptation with versioned contracts; a Claude planner, a MiniMax fallback and a final deterministic generator so the demo never stalls.", "Official sources through AWS Knowledge MCP in read-only mode and an accessible map built with React Flow. The frontend lives in cloudpath-front; the API lives in agentic-dev-hackathon-setup."],
+    },
+  },
+  {
+    id: "trytrust", year: "2026", category: "agents",
+    tech: ["Python", "FastAPI", "Gemini", "MCP", "SD-JWT", "PostgreSQL"],
+    link: "https://github.com/Yosoyepa/trystrus2", flow: ["SEARCH", "MANDATE", "SETTLE"],
+    es: {
+      name: "TryTrust", headline: "Un agente que compra por ti, pero solo con tu firma.",
+      description: "Plataforma de compra agéntica con aprobación humana: el agente busca en catálogos vía MCP, propone con Gemini, valida un mandato criptográfico SD-JWT y liquida en rieles AP2 con un recibo verificable.",
+      status: "Hackathon · Open source", proof: "Un mandato firmado antes de cada pago", award: "3.er puesto · NextWave Hackathon 2026 (Yuno × Nauta), sede Bogotá",
+      details: ["Coordiné los cuatro carriles de desarrollo del equipo durante las 24 horas del hackatón y redacté el brief técnico de cada uno.", "Carril de fraude, contratos e idempotencia: ledger append-only encadenado por hash con raíces firmadas con KMS y outbox relay con FOR UPDATE SKIP LOCKED.", "Contratos OpenAPI, demo con cuatro consolas y pruebas agénticas contra Gemini real; al cierre se desactivó la simulación y se completó un pedido real de prueba."],
+    },
+    en: {
+      name: "TryTrust", headline: "An agent that shops for you, but only with your signature.",
+      description: "An agentic shopping platform with human approval: the agent searches catalogs over MCP, proposes with Gemini, validates an SD-JWT cryptographic mandate and settles on AP2 rails with a verifiable receipt.",
+      status: "Hackathon · Open source", proof: "A signed mandate before every payment", award: "3rd place · NextWave Hackathon 2026 (Yuno × Nauta), Bogotá venue",
+      details: ["I coordinated the team's four development lanes during the 24-hour hackathon and wrote the technical brief for each one.", "Fraud, contracts and idempotency lane: an append-only, hash-chained ledger with KMS-signed roots and an outbox relay with FOR UPDATE SKIP LOCKED.", "OpenAPI contracts, a demo with four consoles and agentic tests against real Gemini; at the close, simulation was switched off and a real test order was completed."],
     },
   },
   {

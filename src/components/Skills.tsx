@@ -15,19 +15,19 @@ export default function Skills() {
   const { t, lang } = useLang();
   const reduce = useReducedMotion();
   const applications = lang === "es" ? [
-    "Python para agentes y automatización; TypeScript para infraestructura; Java para BFF empresariales.",
-    "Orquestación y tool use en Blend360. Workflows controlados en Personal Assistant.",
-    "Retrieval con fuentes en el asistente RAG. Datos persistentes y evaluación de respuestas.",
-    "APIs de CodeGuardAI y Personal Assistant. Eventos, validación y persistencia.",
-    "Despliegues empresariales en Blend360 y stacks reproducibles en BioStock y Secret Oracle.",
-    "Calidad verificable en WCT; observabilidad, CI/CD y control de costes en plataformas AWS.",
+    "Python en la plataforma documental de Inetum y en mis agentes; Rust en Ommatix; TypeScript para infraestructura y frontends; Java para BFF empresariales.",
+    "Agentes con Bedrock y Strands en Blend360; Claude y Gemini en CloudPath y TryTrust; servidores MCP propios en Ommatix.",
+    "Extracción documental con OCR local y evidencia por campo en Inetum; retrieval con fuentes en el asistente RAG.",
+    "APIs y workers con FastAPI, Celery y RabbitMQ sobre AMQPS; capas BFF con Spring Boot en Blend360.",
+    "GitOps con Argo CD y Kustomize sobre OpenShift en Inetum; despliegues en AWS con CDK en Blend360, BioStock y Secret Oracle.",
+    "Calidad verificable en WCT y en la plataforma documental: análisis estático a cero, escaneo de imágenes y secretos, y pruebas de mutación.",
   ] : [
-    "Python for agents and automation; TypeScript for infrastructure; Java for enterprise BFFs.",
-    "Orchestration and tool use at Blend360. Controlled workflows in Personal Assistant.",
-    "Retrieval with sources in the RAG assistant. Persistent data and answer evaluation.",
-    "CodeGuardAI and Personal Assistant APIs. Events, validation and persistence.",
-    "Enterprise deployments at Blend360 and reproducible stacks in BioStock and Secret Oracle.",
-    "Verifiable quality in WCT; observability, CI/CD and cost control in AWS platforms.",
+    "Python in Inetum's document platform and in my agents; Rust in Ommatix; TypeScript for infrastructure and frontends; Java for enterprise BFFs.",
+    "Agents with Bedrock and Strands at Blend360; Claude and Gemini in CloudPath and TryTrust; my own MCP servers in Ommatix.",
+    "Document extraction with local OCR and per-field evidence at Inetum; retrieval with sources in the RAG assistant.",
+    "APIs and workers with FastAPI, Celery and RabbitMQ over AMQPS; BFF layers with Spring Boot at Blend360.",
+    "GitOps with Argo CD and Kustomize on OpenShift at Inetum; AWS deployments with CDK at Blend360, BioStock and Secret Oracle.",
+    "Verifiable quality in WCT and in the document platform: zero static-analysis findings, image and secret scanning, and mutation testing.",
   ];
   const icons: PortfolioIconName[] = ["code", "ai", "data", "stack", "cloud", "journey"];
   const sectionRef = useRef<HTMLElement>(null);

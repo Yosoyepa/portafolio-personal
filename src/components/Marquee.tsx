@@ -3,33 +3,37 @@
 import { useEffect, useRef, useState } from "react";
 import { useInView, useReducedMotion } from "motion/react";
 
-import { Brain, Coin, FileText, FlowArrow, Robot, type Icon } from "@phosphor-icons/react";
+import { Brain, FileText, Robot, Scan, type Icon } from "@phosphor-icons/react";
 import BrandIcon from "@/components/BrandIcon";
 
 // Las tecnologías con marca muestran su logo (BrandIcon); los conceptos sin marca conservan su icono Phosphor.
 const ITEMS: { label: string; icon?: Icon }[] = [
   { label: "Python" },
   { label: "TypeScript" },
-  { label: "Java" },
+  { label: "Rust" },
+  { label: "FastAPI" },
+  { label: "RabbitMQ" },
+  { label: "PostgreSQL" },
+  { label: "OpenShift" },
+  { label: "Argo CD" },
+  { label: "Podman" },
   { label: "Amazon Bedrock" },
+  { label: "Claude" },
+  { label: "Gemini" },
+  { label: "MCP" },
   { label: "Strands Agents", icon: Robot },
   { label: "LangChain" },
-  { label: "FastAPI" },
-  { label: "Spring Boot" },
   { label: "AWS CDK" },
-  { label: "ECS Fargate" },
   { label: "Lambda" },
   { label: "DynamoDB" },
-  { label: "Kinesis" },
-  { label: "OpenSearch" },
-  { label: "Docker" },
-  { label: "Airflow" },
-  { label: "RAG", icon: FileText },
-  { label: "MCP" },
-  { label: "LLMOps", icon: Brain },
-  { label: "FinOps", icon: Coin },
-  { label: "Event-Driven", icon: FlowArrow },
+  { label: "ONNX Runtime" },
+  { label: "OCR", icon: Scan },
+  { label: "SonarQube" },
+  { label: "Trivy" },
+  { label: "GitHub Actions" },
   { label: "OpenTelemetry" },
+  { label: "RAG", icon: FileText },
+  { label: "LLMOps", icon: Brain },
 ];
 
 export default function Marquee() {

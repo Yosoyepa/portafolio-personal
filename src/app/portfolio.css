@@ -151,6 +151,7 @@ button, summary { cursor: pointer; }
 .case-source { display: flex; gap: 9px; align-items: center; color: #c1d3df; min-height: 56px; font-size: 12px; border-top: 1px solid #ffffff0f; }.case-source > svg:last-child { margin-left: auto; transition: transform .2s; }.case-source:hover { color: var(--case-accent); }.case-source:hover > svg:last-child { transform: translate(2px, -2px); }
 /* Proyecto destacado: ocupa la fila completa; en escritorio, diagrama y texto lado a lado. */
 .case-card--featured { grid-column: 1 / -1; }
+.case-grid > .case-card:not(.case-card--featured):last-child:nth-child(odd) { grid-column: 1 / -1; }
 @media (min-width: 1024px) {
   .case-card--featured { display: grid; grid-template-columns: minmax(0, 1.05fr) minmax(0, 1fr); }
   .case-card--featured .case-art { height: auto; min-height: 380px; border-bottom: 0; border-right: 1px solid #ffffff11; }

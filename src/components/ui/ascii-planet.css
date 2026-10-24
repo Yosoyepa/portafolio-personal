@@ -1,0 +1,3 @@
+/* ASCII planet: square canvas that fills its container; the frame and backdrop belong to the host section. */
+.apl-root { position: relative; width: 100%; aspect-ratio: 1; overflow: hidden; contain: layout paint; }
+.apl-canvas { position: absolute; inset: 0; display: block; width: 100%; height: 100%; }

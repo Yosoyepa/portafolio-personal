@@ -1,0 +1,97 @@
+/* The hero journey: a pinned stage, one three.js canvas and three acts of HTML laid over it. */
+.journey { position: relative; height: 240svh; background: #05060b; isolation: isolate; }
+.journey-stage { position: sticky; top: 0; height: 100svh; min-height: 640px; overflow: hidden; }
+
+/* The nebula is the LCP image: it paints from the first frame, before the scene is ready. */
+.journey-nebula { position: absolute; inset: -4%; z-index: 0; pointer-events: none; opacity: .62; background: url('/assets/nebula-blue.webp') center / cover no-repeat; transform-origin: 62% 50%; will-change: transform; }
+.journey-canvas { position: absolute; inset: 0; z-index: 1; width: 100%; height: 100%; display: block; pointer-events: none; opacity: 0; transition: opacity 1.2s; }
+.journey[data-ready] .journey-canvas { opacity: 1; }
+.journey-shade { position: absolute; inset: 0; z-index: 2; pointer-events: none;
+  background:
+    linear-gradient(90deg, #05060bd9, #05060ba6 30%, #05060b33 48%, transparent 58%),
+    linear-gradient(180deg, #05060bb3, transparent 22%, transparent 76%, #05060bd9); }
+
+/* Labels projected by the scene: the element sits at 0,0 and the scene writes its transform. */
+.journey-labels { position: absolute; inset: 0; z-index: 3; pointer-events: none; }
+.journey-label { position: absolute; left: 0; top: 0; opacity: 0; will-change: transform, opacity; --label: #9ff3f0; }
+.journey-label > span { position: absolute; left: 0; bottom: 0; display: flex; flex-direction: column; align-items: center; gap: 3px; padding-bottom: 24px; transform: translate(-50%, 0); white-space: nowrap; font: 10px var(--font-mono); letter-spacing: .16em; text-transform: uppercase; color: var(--label); text-shadow: 0 1px 10px #05060b; transition: filter .3s; }
+.journey-label small { font-size: 8.5px; letter-spacing: .1em; color: #9fb0c2; }
+.journey-label > span::after { content: ""; position: absolute; left: 50%; bottom: 0; width: 1px; height: 18px; background: linear-gradient(var(--label), transparent); opacity: .7; }
+.journey-label[data-active] > span { filter: brightness(1.35) drop-shadow(0 0 8px color-mix(in srgb, var(--label) 55%, transparent)); }
+.journey-label--core { --label: #e3f4ff; }
+.journey-label--core > span { padding: 24px 0 0; bottom: auto; top: 0; color: #e3f4ff; }
+.journey-label--core > span::after { top: 0; bottom: auto; background: linear-gradient(transparent, var(--label)); }
+
+/* Acts */
+.journey-act { position: absolute; z-index: 4; left: max(32px, calc((100vw - 1280px) / 2)); text-shadow: 0 2px 18px #05060b; }
+.journey-act--intro { top: 50%; max-width: 640px; translate: 0 -50%; }
+.journey .signal-title > span { color: inherit; }
+.journey .signal-title > .journey-line--accent { color: var(--accent-soft); }
+.journey-act--system { bottom: 12vh; max-width: 520px; width: calc(100% - 64px); }
+.journey-act--run { top: 50%; max-width: 560px; translate: 0 -50%; }
+.journey-kicker { font: 10px var(--font-mono); letter-spacing: .18em; text-transform: uppercase; color: #63dce5; }
+.journey-act-title { margin: 14px 0 22px; font: 500 clamp(30px, 2.4vw, 34px)/1.2 var(--font-display); letter-spacing: -.04em; color: #e7eef5; }
+.journey-run-title { margin: 18px 0 20px; font: 500 clamp(2.4rem, 4.4vw, 4rem)/1.06 var(--font-display); letter-spacing: -.05em; color: #eef4f8; }
+.journey-run-text { max-width: 440px; font-size: clamp(15px, 1.1vw, 16px); line-height: 1.8; color: #b3bdce; }
+.journey-next { display: inline-flex; align-items: center; gap: 12px; min-height: 44px; margin-top: 22px; font-size: 13px; color: #d2dbe3; }
+.journey-next:hover { color: var(--accent-soft); }
+
+/* Route rail on the right edge. */
+.journey-rail { position: absolute; z-index: 4; right: 28px; top: 50%; height: 46vh; width: 1px; translate: 0 -50%; background: #ffffff1c; pointer-events: none; }
+.journey-rail-fill { position: absolute; inset: 0; background: linear-gradient(#63dce5, #a795ee); transform-origin: top; transform: scaleY(0); }
+.journey-waypoint { position: absolute; right: 0; display: flex; align-items: center; gap: 10px; translate: 3px -50%; flex-direction: row-reverse; font: 9px var(--font-mono); letter-spacing: .16em; text-transform: uppercase; color: #6f8091; transition: color .4s; }
+.journey-waypoint i { width: 7px; height: 7px; border-radius: 50%; border: 1px solid #8fa1b3; background: #05060b; transition: background .4s, border-color .4s, box-shadow .4s; }
+.journey-waypoint[data-on] { color: #cfe9ee; }
+.journey-waypoint[data-on] i { background: #63dce5; border-color: #adf3ed; box-shadow: 0 0 12px #63dce5aa; }
+
+/* Meta row under the navbar. */
+.journey-meta { position: absolute; z-index: 5; top: 96px; left: max(32px, calc((100vw - 1280px) / 2)); right: max(32px, calc((100vw - 1280px) / 2)); display: flex; align-items: center; justify-content: space-between; gap: 16px; font: 9px var(--font-mono); letter-spacing: .17em; text-transform: uppercase; color: #7e9caa; }
+.journey-meta b { font-weight: 400; color: #4b5b69; }
+.journey-meta button { min-height: 44px; display: flex; align-items: center; gap: 7px; padding-left: 10px; font: 9px var(--font-mono); letter-spacing: .17em; text-transform: uppercase; color: #bac6d1; }
+.journey-meta button:hover { color: #d5fbff; }
+
+.journey-bottom.signal-bottom { position: absolute; z-index: 4; left: 0; right: 0; bottom: 0; max-width: 1280px; margin: 0 auto; padding-inline: 32px; box-sizing: border-box; }
+.journey-exit { position: absolute; inset: 0; z-index: 6; background: #05060b; opacity: 0; pointer-events: none; }
+
+@media (min-width: 1345px) { .journey-bottom.signal-bottom { padding-inline: 0; } }
+@media (max-width: 1100px) { .journey-act--intro { max-width: 560px; } }
+@media (max-width: 767px) {
+  .journey-act { left: 24px; right: 24px; }
+  .journey-act--intro { top: 104px; translate: none; max-width: none; }
+  .journey-act--intro .signal-title { margin-block: 22px 18px; }
+  .journey-act--intro .signal-proof { display: none; }
+  .journey-act--system { bottom: 24px; width: auto; max-width: none; }
+  .journey-act--run { top: auto; bottom: 32px; translate: none; max-width: none; }
+  .journey-run-title { font-size: clamp(2rem, 9vw, 2.6rem); margin-block: 12px 14px; }
+  .journey-act-title { font-size: 24px; margin-block: 10px 16px; }
+  .journey-rail { display: none; }
+  .journey-meta { top: 72px; left: 24px; right: 24px; justify-content: flex-end; }
+  .journey-meta > span { display: none; }
+  .journey-bottom.signal-bottom { padding-inline: 24px; }
+  /* The headline sits on top in act 1 and the panels at the bottom afterwards: each gets its own veil. */
+  .journey-shade { background: none; }
+  .journey-shade::before, .journey-shade::after { content: ""; position: absolute; inset: 0; transition: opacity .6s; }
+  .journey-shade::before { background: linear-gradient(180deg, #05060bf0, #05060bd1 42%, #05060b66 53%, transparent 60%, transparent 72%, #05060bb3 86%, #05060bf2); }
+  .journey-shade::after { opacity: 0; background: linear-gradient(180deg, #05060b99, transparent 18%, transparent 60%, #05060bb3 70%, #05060bf2); }
+  .journey:not([data-act="0"]) .journey-shade::before { opacity: 0; }
+  .journey:not([data-act="0"]) .journey-shade::after { opacity: 1; }
+}
+@media (max-width: 640px) { .journey-nebula { background-image: url('/assets/nebula-blue-mobile.webp'); } }
+
+@media (prefers-reduced-motion: reduce) {
+  .journey { height: auto; }
+  .journey-stage { position: relative; height: auto; min-height: 100svh; }
+  .journey-canvas { transition: none; }
+  .journey-act--system { opacity: 1 !important; transform: none !important; left: auto; right: max(32px, calc((100vw - 1280px) / 2)); bottom: 96px; }
+  .journey-act--run, .journey-rail, .journey-exit { display: none; }
+  /* Values Motion wrote before the preference was known must not linger: the frame is fixed. */
+  .journey-act--intro, .journey-bottom.signal-bottom { opacity: 1 !important; transform: none !important; }
+  .journey-nebula { opacity: .62 !important; transform: none !important; }
+}
+@media (prefers-reduced-motion: reduce) and (max-width: 767px) {
+  .journey-stage { display: flex; flex-direction: column; padding: 104px 24px 88px; }
+  .journey-act, .journey-act--intro, .journey-act--system { position: relative; inset: auto; }
+  .journey-act--system { margin-top: 300px; }
+  .journey .journey-shade::before, .journey .journey-shade::after { opacity: 1; transition: none; }
+  .journey .journey-shade::before { background: linear-gradient(180deg, #05060bf0, #05060bd1 36%, transparent 46%); }
+}

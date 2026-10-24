@@ -74,10 +74,10 @@ export default function Navbar() {
         <a
           href="#inicio"
           onClick={(e) => go(e, "#inicio")}
-          className="group flex items-center gap-2.5"
+          className="nav-logo flex items-center gap-2.5"
           aria-label={t.nav.home}
         >
-          <span className="grid size-8 place-items-center rounded-lg bg-gradient-to-br from-cyan to-violet font-display text-[13px] font-extrabold text-[#04050a] transition-transform duration-300 group-hover:rotate-[-6deg]">
+          <span className="grid size-8 place-items-center rounded-lg bg-gradient-to-br from-cyan to-violet font-display text-[13px] font-extrabold text-[#04050a] transition-transform duration-300 nav-logo-mark">
             JA
           </span>
           <span className="hidden font-mono text-xs tracking-widest text-muted xl:block">

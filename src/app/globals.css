@@ -611,3 +611,8 @@ section[id] { scroll-margin-top: 6rem; }
   #experiencia .career-current { display: block; }
 }
 @media (prefers-reduced-motion: reduce) { .project-art svg { transition: none; } .project-card:hover .project-art svg { transform: none; } }
+
+/* Hover con combinador de hijo en lugar de `group-hover:` de Tailwind, que compila a `:is(:where(.group):hover *)`:
+   Chrome no puede acotar esa invalidación y reestilaba subárboles de ~1000 elementos con cada cambio de :hover. */
+.profile-capability:hover > .profile-capability-desc { color: rgb(255 255 255 / .95); }
+.nav-logo:hover > .nav-logo-mark { transform: rotate(-6deg); }

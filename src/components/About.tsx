@@ -130,7 +130,7 @@ export default function About() {
                   href="#stack"
                   onClick={event => { event.preventDefault(); scrollToId("#stack"); }}
                   data-reveal
-                  className="profile-capability relative rounded-xl p-4 sm:p-4.5 bg-[#0b1022]/90 border border-white/[0.08] hover:border-cyan-400/40 hover:bg-[#0f1730]/95 group flex flex-col justify-start shadow-sm"
+                  className="profile-capability relative rounded-xl p-4 sm:p-4.5 bg-[#0b1022]/90 border border-white/[0.08] hover:border-cyan-400/40 hover:bg-[#0f1730]/95 flex flex-col justify-start shadow-sm"
                 >
                   <div className="flex items-center gap-2.5">
                     <span className="inline-flex shrink-0 items-center justify-center font-mono text-[11px] font-bold text-cyan-300 bg-cyan-950/90 border border-cyan-400/40 px-2 py-0.5 rounded shadow-[0_0_8px_-2px_rgba(34,211,238,0.45)]">
@@ -140,7 +140,7 @@ export default function About() {
                       {h.title}
                     </h3>
                   </div>
-                  <p className="mt-2.5 text-[12.5px] sm:text-[13px] leading-relaxed text-[#c0cbe2] group-hover:text-white/95 transition-colors">
+                  <p className="mt-2.5 text-[12.5px] sm:text-[13px] leading-relaxed text-[#c0cbe2] profile-capability-desc transition-colors">
                     {h.desc}
                   </p>
                   <span className="capability-explore">{lang === "es" ? "Explorar stack" : "Explore stack"}<ArrowUpRight size={13} aria-hidden /></span>

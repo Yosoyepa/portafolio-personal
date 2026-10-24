@@ -44,4 +44,20 @@ Fecha: 2026-10-24 · Diseño e implementación: el arquitecto (Claude Opus 5.5),
       asíncrono, sin tocar el efecto.
 
 ## Cierre
-_(al final)_
+
+2026-10-24. Diseño y revisión: arquitecto. Implementación: workers Opus 5.5 (esfuerzo medio) `w-hero` (2 rondas),
+`w-planet` (2 rondas), `w-content`, `w-stack`, `w-perf` y `w-mobile`, integrados en `main` y verificados por el arquitecto
+sobre el export.
+
+| Ítem | Estado | Evidencia |
+|---|---|---|
+| I1 Hero «viaje» | **Cumplido** | Una escena three.js en tres actos: estrella-idea con espigas y destello → polvo que forma Contexto, Agentes y Producción → paquetes en las órbitas y zambullida. `compileAsync`, chunk diferido, H1 en HTML. 0 tareas largas en el hero; 0 frames en pausa, fuera de vista y con pestaña oculta; movimiento reducido sin tramo fijado. |
+| I2 Fluidez | **Cumplido** | Recorrido con rueda sobre el export. Escritorio 1440×900: 0 tareas largas (antes 13, máx. 575 ms). Móvil 390×844 CPU ×4: máx. 68 ms, todas en Actividad (antes 10 tareas de hasta 335 ms). Causas corregidas: compilación síncrona de shaders (LaserFlow, Dither, RippleGrid, Scanner), container query del heatmap, animaciones de layout, `content-visibility`, ola de 371 transiciones simultáneas, variables de BorderGlow y selectores `group-hover:`. |
+| I3 Contenido | **Cumplido** | Inetum con el stack y las prácticas actuales, anonimizado; Stack, Marquee y Perfil con el stack de 2026; CloudPath (Platanus Build Night) y TryTrust (NextWave) con sus 3.os puestos declarados por el responsable; insignias oficiales de Credly; planeta ASCII en Actividad en lugar de la foto. |
+| I4 Calidad | **Cumplido** | `node --test` 43/43, `tsc` limpio, `pnpm build` con First Load JS de `/` en 256 kB (≤ 265). Export: 0 errores de consola y 0 px de scroll horizontal en 1440/768/390, con y sin movimiento reducido, ES/EN. |
+| I5 Gates | **Cumplido** | Push autorizado por el responsable en el chat («haces push»). `LaserFlow.jsx` cambia solo su arranque (`compileAsync`). |
+
+Pendiente para el responsable: revisar el texto de Inetum (sale de notas confidenciales, anonimizado); avisos de
+hidratación solo en desarrollo (About con movimiento reducido, `useId` intermitente en Actividad y Certificaciones);
+Kustomize, Gitleaks, Hadolint, import-linter, PyMuPDF, RapidOCR y Tesseract no tienen logo en Simple Icons; el
+snapshot de GitHub se refresca a mano con `node scripts/fetch-github-activity.mjs`.

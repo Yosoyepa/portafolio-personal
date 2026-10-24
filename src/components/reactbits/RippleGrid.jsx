@@ -4,6 +4,7 @@ import { useRef, useEffect } from 'react';
 import { Renderer, Program, Triangle, Mesh } from 'ogl';
 import './RippleGrid.css';
 import { createRenderLoop } from '@/lib/renderLoop.mjs';
+import { warmShaders } from '@/lib/warmup.mjs';
 
 const RippleGrid = ({
   enableRainbow = false,
@@ -180,10 +181,15 @@ void main() {
     uniformsRef.current = uniforms;
 
     const geometry = new Triangle(gl);
-    const program = new Program(gl, { vertex: vert, fragment: frag, uniforms });
-    const mesh = new Mesh(gl, { geometry, program });
-
+    // Link only after a background compile, so mounting never stalls a scroll frame; until then nothing is drawn.
+    let program, mesh, loop;
     let disposed = false;
+    const warm = warmShaders(gl, vert, frag);
+    warm.ready.then(() => {
+      if (disposed) return;
+      program = new Program(gl, { vertex: vert, fragment: frag, uniforms });
+      mesh = new Mesh(gl, { geometry, program }); loop.invalidate();
+    });
     const resize = () => {
       // A queued observation can arrive after React has detached the ref.
       if (disposed || !container.isConnected) return;
@@ -221,6 +227,7 @@ void main() {
 
     let elapsed = 0;
     const render = dt => {
+      if (!mesh) return;
       if (!disableAnimation) elapsed += dt;
       uniforms.iTime.value = elapsed * 0.35;
 
@@ -237,10 +244,11 @@ void main() {
       renderer.render({ scene: mesh });
     };
 
-    const loop = createRenderLoop(container, render, { enabled: () => !disableAnimation });
+    loop = createRenderLoop(container, render, { enabled: () => !disableAnimation });
 
     return () => {
       disposed = true;
+      warm.cancel();
       loop.dispose();
       resizeObserver.disconnect();
       uniformsRef.current = null;
@@ -249,7 +257,7 @@ void main() {
         surface.removeEventListener('mouseenter', handleMouseEnter);
         surface.removeEventListener('mouseleave', handleMouseLeave);
       }
-      geometry.remove(); program.remove(); gl.canvas.remove();
+      geometry.remove(); program?.remove(); gl.canvas.remove();
       renderer.gl.getExtension('WEBGL_lose_context')?.loseContext();
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps

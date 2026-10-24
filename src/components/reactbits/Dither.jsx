@@ -4,6 +4,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { Renderer, Triangle, Program, Mesh } from 'ogl';
 import { createRenderLoop } from '@/lib/renderLoop.mjs';
+import { warmShaders } from '@/lib/warmup.mjs';
 import './Dither.css';
 
 const fragment = `precision highp float;
@@ -106,11 +107,18 @@ export default function Dither({ waveSpeed = .05, waveFrequency = 3, waveAmplitu
       enableMouseInteraction: { value: enableMouseInteraction ? 1 : 0 },
       colorNum: { value: colorNum }, pixelSize: { value: pixelSize * .75 }
     };
-    const program = new Program(gl, { vertex, fragment, uniforms });
-    const mesh = new Mesh(gl, { geometry, program });
+    // Link only after a background compile, so mounting never stalls a scroll frame; until then nothing is drawn.
+    let program, mesh;
+    const warm = warmShaders(gl, vertex, fragment);
+    warm.ready.then(() => {
+      if (runtime.current !== loop) return;
+      program = new Program(gl, { vertex, fragment, uniforms });
+      mesh = new Mesh(gl, { geometry, program }); loop.invalidate();
+    });
     let lost = false;
     const loop = createRenderLoop(gl.canvas, delta => {
       const p = props.current;
+      if (!mesh) return;
       if (!p.disableAnimation) uniforms.time.value += delta;
       for (const key of ['waveSpeed', 'waveFrequency', 'waveAmplitude', 'waveColor', 'backgroundColor', 'mouseRadius']) uniforms[key].value = p[key];
       uniforms.enableMouseInteraction.value = p.enableMouseInteraction ? 1 : 0;
@@ -140,10 +148,10 @@ export default function Dither({ waveSpeed = .05, waveFrequency = 3, waveAmplitu
     gl.canvas.addEventListener('webglcontextlost', contextLost);
     gl.canvas.addEventListener('webglcontextrestored', contextRestored);
     return () => {
-      loop.dispose(); runtime.current = null; ro.disconnect();
+      warm.cancel(); loop.dispose(); runtime.current = null; ro.disconnect();
       section?.removeEventListener('pointermove', move, true); section?.removeEventListener('pointerleave', leave);
       gl.canvas.removeEventListener('webglcontextlost', contextLost); gl.canvas.removeEventListener('webglcontextrestored', contextRestored);
-      geometry.remove(); program.remove(); gl.canvas.remove();
+      geometry.remove(); program?.remove(); gl.canvas.remove();
       gl.getExtension('WEBGL_lose_context')?.loseContext();
     };
   }, [generation]);

@@ -30,7 +30,6 @@ export interface JourneyApi {
 
 type Planet = { group: THREE.Group; mesh: THREE.Mesh; material: THREE.ShaderMaterial; radius: number; orbit: number; speed: number; phase: number; orbitLine: THREE.LineLoop };
 
-const STAR_COLOR = new THREE.Color("#cfefff");
 const PLANETS = [
   // Contexto: an ice-and-ocean world. Agentes: a violet gas giant with rings. Producción: a warm, rocky world.
   { a: "#0d3b4a", b: "#63dce5", rim: "#9ff3f0", radius: 0.55, orbit: 3.4, speed: 0.16, phase: 0.6, bands: 3.0, ring: false },
@@ -137,38 +136,79 @@ export function createJourney(options: JourneyOptions): JourneyApi | null {
   system.rotation.set(-0.42, 0, 0.16);
   scene.add(system);
 
-  // Star: plasma core, glow and an anamorphic streak.
+  // Star: a granulated core that never clips to white, a corona that overlaps its limb (so the edge never reads as
+  // hard), slow diffraction spikes and an anamorphic streak. In act 1 the core shrinks to a point of light.
+  const CORE_RADIUS = 0.52;
+  const GLOW_SIZE = 10;
   const coreMaterial = track(new THREE.ShaderMaterial({
-    uniforms: { uTime: { value: 0 }, uColor: { value: STAR_COLOR }, uBoost: { value: 0 } },
+    uniforms: { uTime: { value: 0 }, uBoost: { value: 0 } },
     vertexShader: /* glsl */ `varying vec3 vNormal; varying vec3 vPos; varying vec3 vView;
       void main() { vNormal = normalize(normalMatrix * normal); vPos = position; vec4 mv = modelViewMatrix * vec4(position, 1.0); vView = normalize(-mv.xyz); gl_Position = projectionMatrix * mv; }`,
-    fragmentShader: /* glsl */ `uniform float uTime; uniform vec3 uColor; uniform float uBoost; varying vec3 vNormal; varying vec3 vPos; varying vec3 vView;
+    fragmentShader: /* glsl */ `uniform float uTime; uniform float uBoost; varying vec3 vNormal; varying vec3 vPos; varying vec3 vView;
       ${NOISE}
       void main() {
-        float granules = fbm(vPos * 3.2 + vec3(0.0, uTime * 0.12, uTime * 0.05));
-        float limb = pow(max(dot(vNormal, vView), 0.0), 0.45);
-        vec3 c = mix(uColor, vec3(1.0), clamp(granules * 0.6 + limb * 0.45, 0.0, 1.0)) * (0.82 + 0.5 * limb);
-        c += vec3(0.35, 0.75, 1.0) * pow(1.0 - limb, 3.0) * 0.6;
-        gl_FragColor = vec4(mix(c, vec3(1.0), uBoost), 1.0);
+        vec3 q = normalize(vPos);
+        float cells = fbm(q * 7.0 + vec3(0.0, uTime * 0.05, uTime * 0.03));
+        float fine = noise(q * 22.0 + uTime * 0.08);
+        float granules = cells * 0.75 + fine * 0.25;
+        float mu = max(dot(normalize(vNormal), normalize(vView)), 0.0);
+        // Limb darkening toward cyan; the centre is a bluish white that stays below 1.0.
+        vec3 limbColor = vec3(0.16, 0.62, 0.78);
+        vec3 centre = vec3(0.9, 0.96, 1.0);
+        vec3 c = mix(limbColor, centre, pow(mu, 0.5)) * (0.66 + 0.4 * granules) * (0.5 + 0.5 * pow(mu, 0.45));
+        gl_FragColor = vec4(mix(c, vec3(0.8, 0.92, 1.0), uBoost), 1.0);
       }`,
   }));
-  const core = new THREE.Mesh(track(new THREE.SphereGeometry(0.85, 48, 32)), coreMaterial);
+  const core = new THREE.Mesh(track(new THREE.SphereGeometry(CORE_RADIUS, 48, 32)), coreMaterial);
   system.add(core);
 
-  const spriteMaterial = (color: THREE.Color, shape: "glow" | "streak") => track(new THREE.ShaderMaterial({
-    uniforms: { uColor: { value: color }, uIntensity: { value: 1 } },
-    vertexShader: /* glsl */ `varying vec2 vUv; void main() { vUv = uv; gl_Position = projectionMatrix * (modelViewMatrix * vec4(0.0, 0.0, 0.0, 1.0) + vec4(position.xy, 0.0, 0.0)); }`,
-    fragmentShader: shape === "glow"
-      ? /* glsl */ `uniform vec3 uColor; uniform float uIntensity; varying vec2 vUv;
-          void main() { float d = length(vUv - 0.5) * 2.0; float g = exp(-d * 3.4) * 0.7 + exp(-d * 11.0) * 1.3; gl_FragColor = vec4(uColor * g * uIntensity, g * uIntensity); }`
-      : /* glsl */ `uniform vec3 uColor; uniform float uIntensity; varying vec2 vUv;
-          void main() { vec2 q = (vUv - 0.5) * 2.0; float g = exp(-abs(q.y) * 34.0) * exp(-abs(q.x) * 2.6); gl_FragColor = vec4(uColor * g * uIntensity, g * uIntensity); }`,
+  // Billboards drawn just in front of the core's limb, so they overlap it but still hide behind nearer planets.
+  const billboard = /* glsl */ `uniform float uLift; varying vec2 vUv;
+    void main() { vUv = uv; vec4 mv = modelViewMatrix * vec4(0.0, 0.0, 0.0, 1.0); mv.z += uLift; gl_Position = projectionMatrix * (mv + vec4(position.xy, 0.0, 0.0)); }`;
+  const glowMaterial = track(new THREE.ShaderMaterial({
+    uniforms: { uTime: { value: 0 }, uIntensity: { value: 1 }, uCore: { value: CORE_RADIUS / (GLOW_SIZE / 2) }, uFill: { value: 0 }, uBloom: { value: 0 }, uLift: { value: 0 } },
+    vertexShader: billboard,
+    fragmentShader: /* glsl */ `uniform float uTime; uniform float uIntensity; uniform float uCore; uniform float uFill; uniform float uBloom; varying vec2 vUv;
+      ${NOISE}
+      void main() {
+        vec2 q = (vUv - 0.5) * 2.0;
+        float d = length(q);
+        float r = d / uCore; // 1.0 at the core's limb
+        float a = atan(q.y, q.x);
+        // Corona: starts inside the limb, peaks just outside it and falls off; streamers drift slowly.
+        float ramp = smoothstep(0.7, 1.04, r);
+        float streamers = 0.6 + 0.8 * noise(vec3(cos(a) * 2.6, sin(a) * 2.6, uTime * 0.04) + vec3(0.0, 0.0, r * 0.35));
+        float corona = ramp * exp(-max(r - 1.0, 0.0) * 1.0) * (0.55 + 0.45 * streamers);
+        float halo = exp(-d * 4.0) * 0.32 + exp(-d * 1.4) * 0.08;
+        // Four thin diffraction spikes turning very slowly, plus two fainter ones.
+        float t = uTime * 0.012;
+        float spikes = (pow(abs(cos(2.0 * (a - t))), 420.0) + 0.45 * pow(abs(cos(2.0 * (a - t) + 0.785)), 900.0)) * exp(-d * 4.6) * ramp * (0.5 + 0.5 * min(uFill, 1.0));
+        float point = uFill * exp(-r * 1.1);
+        // The dive: the core dissolves into a wide bloom that also swallows the spikes.
+        float bloom = uBloom * (exp(-d * 3.0) * 0.9 + exp(-d * 9.0) * 0.9);
+        spikes *= 1.0 - uBloom * 0.7;
+        // While diving the cyan cools toward blue-white, so the faded clip at the centre never reads warm.
+        vec3 cyan = mix(vec3(0.45, 0.86, 1.0), vec3(0.55, 0.72, 1.0), uBloom);
+        vec3 col = cyan * (corona * 0.75 + halo) + vec3(0.8, 0.94, 1.0) * (spikes * 0.7 + point) + vec3(0.62, 0.8, 1.0) * bloom;
+        // Fade to nothing before the quad's edge so its square never shows.
+        float edge = smoothstep(1.0, 0.72, d);
+        float g = (corona * 0.75 + halo + spikes * 0.7 + point + bloom) * uIntensity * edge;
+        vec3 rgb = col * uIntensity * edge;
+        rgb /= max(1.0, max(rgb.r, max(rgb.g, rgb.b))); // clip by scaling, keeping the hue
+        // Premultiplied output must keep alpha >= every channel, or the page composites it into the wrong hue.
+        gl_FragColor = vec4(rgb, clamp(max(g, max(rgb.r, max(rgb.g, rgb.b))), 0.0, 1.0));
+      }`,
     // The shaders output premultiplied colour: plain SRC_ALPHA blending would square the falloff and hide the halo.
     transparent: true, depthWrite: false, blending: THREE.AdditiveBlending, premultipliedAlpha: true,
   }));
-  const glowMaterial = spriteMaterial(new THREE.Color("#8fdcff"), "glow");
-  const streakMaterial = spriteMaterial(new THREE.Color("#7fd6ff"), "streak");
-  const glow = new THREE.Mesh(track(new THREE.PlaneGeometry(9, 9)), glowMaterial);
+  const streakMaterial = track(new THREE.ShaderMaterial({
+    uniforms: { uColor: { value: new THREE.Color("#7fd6ff") }, uIntensity: { value: 1 }, uLift: { value: 0 } },
+    vertexShader: billboard,
+    fragmentShader: /* glsl */ `uniform vec3 uColor; uniform float uIntensity; varying vec2 vUv;
+      void main() { vec2 q = (vUv - 0.5) * 2.0; float g = exp(-abs(q.y) * 34.0) * (exp(-abs(q.x) * 2.6) * 0.8 + exp(-abs(q.x) * 14.0) * 0.6); gl_FragColor = vec4(uColor * g * uIntensity, g * uIntensity); }`,
+    transparent: true, depthWrite: false, blending: THREE.AdditiveBlending, premultipliedAlpha: true,
+  }));
+  const glow = new THREE.Mesh(track(new THREE.PlaneGeometry(GLOW_SIZE, GLOW_SIZE)), glowMaterial);
   const streak = new THREE.Mesh(track(new THREE.PlaneGeometry(26, 1.1)), streakMaterial);
   glow.renderOrder = streak.renderOrder = 2;
   system.add(glow, streak);
@@ -186,8 +226,8 @@ export function createJourney(options: JourneyOptions): JourneyApi | null {
   dustGeometry.setAttribute("position", new THREE.BufferAttribute(new Float32Array(dustCount * 3), 3));
   dustGeometry.setAttribute("dust", new THREE.BufferAttribute(dustData, 4));
   const dustMaterial = track(new THREE.ShaderMaterial({
-    uniforms: { uTime: { value: 0 }, uForm: { value: 0 }, uPixel: { value: dpr } },
-    vertexShader: /* glsl */ `attribute vec4 dust; uniform float uTime; uniform float uForm; uniform float uPixel; varying vec3 vColor; varying float vAlpha;
+    uniforms: { uTime: { value: 0 }, uForm: { value: 0 }, uExit: { value: 0 }, uPixel: { value: dpr } },
+    vertexShader: /* glsl */ `attribute vec4 dust; uniform float uTime; uniform float uForm; uniform float uExit; uniform float uPixel; varying vec3 vColor; varying float vAlpha;
       void main() {
         float r = mix(dust.x, dust.z, uForm);
         float a = dust.y + uTime * 0.9 / pow(r, 1.5);
@@ -195,7 +235,8 @@ export function createJourney(options: JourneyOptions): JourneyApi | null {
         vec4 mv = modelViewMatrix * vec4(p, 1.0);
         float warm = smoothstep(4.0, 1.4, r);
         vColor = mix(mix(vec3(0.42, 0.86, 0.92), vec3(0.66, 0.6, 1.0), smoothstep(4.5, 8.0, r)), vec3(1.0, 0.86, 0.66), warm);
-        vAlpha = (0.35 + 0.4 * fract(dust.y * 13.0)) * mix(1.0, 0.55, uForm);
+        // During the dive the camera passes through the warm inner dust: let it thin out instead of tinting the bloom.
+        vAlpha = (0.35 + 0.4 * fract(dust.y * 13.0)) * mix(1.0, 0.55, uForm) * (1.0 - uExit * smoothstep(5.0, 1.5, r) * 0.9);
         gl_PointSize = uPixel * (1.4 + fract(dust.y * 7.0) * 1.8) * clamp(22.0 / -mv.z, 0.4, 3.0);
         gl_Position = projectionMatrix * mv;
       }`,
@@ -380,7 +421,7 @@ export function createJourney(options: JourneyOptions): JourneyApi | null {
     const x = (projected.x * 0.5 + 0.5) * width;
     const y = (-projected.y * 0.5 + 0.5) * height;
     // Nor is any planet label printed over the star's disc.
-    const overStar = object === core ? 1 : smooth(starRadius * 0.9, starRadius * 1.5, Math.hypot((projected.x - coreScreen.x) * width / 2, (projected.y - coreScreen.y) * height / 2));
+    const overStar = object === core ? 1 : smooth(starRadius * 1.6, starRadius * 2.8, Math.hypot((projected.x - coreScreen.x) * width / 2, (projected.y - coreScreen.y) * height / 2));
     element.style.transform = `translate3d(${x.toFixed(1)}px, ${y.toFixed(1)}px, 0)`;
     element.style.opacity = behind ? "0" : (visibility * overStar).toFixed(3);
   };
@@ -428,18 +469,29 @@ export function createJourney(options: JourneyOptions): JourneyApi | null {
     corePos.copy(lightPosition);
     projected.copy(corePos).project(camera);
     coreScreen.set(projected.x, projected.y);
-    starRadius = 0.85 / corePos.distanceTo(camera.position) / Math.tan(THREE.MathUtils.degToRad(camera.fov / 2)) * height / 2;
+    // Act 1: a point of light (small core, filled hot centre); it grows into a star as the system forms.
+    const grow = smooth(0.04, 0.42, p);
+    const coreScale = Math.max(0.001, (0.38 + 0.62 * grow) * (1 - smooth(0.86, 0.97, p)));
+    const glowScale = (0.8 + 0.2 * grow) * (1 + exit * exit * 5);
+    core.scale.setScalar(coreScale);
+    starRadius = CORE_RADIUS * coreScale / corePos.distanceTo(camera.position) / Math.tan(THREE.MathUtils.degToRad(camera.fov / 2)) * height / 2;
     coreMaterial.uniforms.uTime.value = time;
-    glowMaterial.uniforms.uIntensity.value = 1.15 - form * 0.25 + exit * 2.4;
-    glow.scale.setScalar(1 + exit * exit * 5);
     coreMaterial.uniforms.uBoost.value = exit * 0.4;
-    streakMaterial.uniforms.uIntensity.value = (1 - form * 0.55) * 0.9 + exit * 1.2;
+    glow.scale.setScalar(glowScale);
+    glowMaterial.uniforms.uTime.value = time;
+    glowMaterial.uniforms.uCore.value = (CORE_RADIUS * coreScale) / (GLOW_SIZE / 2 * glowScale);
+    glowMaterial.uniforms.uFill.value = (1 - grow) * 1.6;
+    glowMaterial.uniforms.uBloom.value = exit;
+    glowMaterial.uniforms.uIntensity.value = 1.1 - form * 0.2 + exit * 2.4;
+    glowMaterial.uniforms.uLift.value = streakMaterial.uniforms.uLift.value = CORE_RADIUS * coreScale * 1.05;
+    streakMaterial.uniforms.uIntensity.value = (1 - form * 0.55) * 1.1 + exit * 1.2;
     starMaterial.uniforms.uTime.value = time;
     starMaterial.uniforms.uFade.value = 1 - exit * 0.6;
 
     // Dust condenses onto the planets' lanes.
     dustMaterial.uniforms.uTime.value = time;
     dustMaterial.uniforms.uForm.value = form;
+    dustMaterial.uniforms.uExit.value = exit;
 
     planets.forEach((planet, index) => {
       const angle = planet.phase + time * planet.speed;

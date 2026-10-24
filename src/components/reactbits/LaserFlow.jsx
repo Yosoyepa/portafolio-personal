@@ -573,8 +573,10 @@ export const LaserFlow = ({
 
     // Compile off the main thread (KHR_parallel_shader_compile) before the first frame: a synchronous link here blocked
     // scrolling for 400–600 ms as the profile section approached.
+    // GPU resources are released only after compilation settles: three keeps polling the program until it links.
     let disposed = false;
-    renderer.compileAsync(scene, camera).catch(() => {}).then(() => {
+    const compiled = renderer.compileAsync(scene, camera).catch(() => {});
+    compiled.then(() => {
       if (!disposed) renderLoop = createRenderLoop(mount, animate, { fps: 30, enabled: () => !pausedRef.current });
     });
 
@@ -590,11 +592,13 @@ export const LaserFlow = ({
       eventTarget.removeEventListener('pointerleave', onLeave);
       canvas.removeEventListener('webglcontextlost', onCtxLost);
       canvas.removeEventListener('webglcontextrestored', onCtxRestored);
-      geometry.dispose();
-      material.dispose();
-      renderer.dispose();
-      renderer.forceContextLoss();
       if (mount.contains(canvas)) mount.removeChild(canvas);
+      compiled.then(() => {
+        geometry.dispose();
+        material.dispose();
+        renderer.dispose();
+        renderer.forceContextLoss();
+      });
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [dpr]);

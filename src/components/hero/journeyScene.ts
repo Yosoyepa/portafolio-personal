@@ -538,8 +538,10 @@ export function createJourney(options: JourneyOptions): JourneyApi | null {
   resize();
 
   let disposed = false;
-  // Compile every program off the main thread before the first frame.
-  renderer.compileAsync(scene, camera).catch(() => {}).then(() => {
+  // Compile every program off the main thread before the first frame. GPU resources are released only after it settles:
+  // three keeps polling the programs until they link and throws if they are disposed underneath it.
+  const compiled = renderer.compileAsync(scene, camera).catch(() => {});
+  compiled.then(() => {
     if (disposed) return;
     loop = createRenderLoop(host, draw, { fps: 60, enabled: () => playing });
     loop.invalidate();
@@ -559,9 +561,11 @@ export function createJourney(options: JourneyOptions): JourneyApi | null {
       disposed = true;
       loop?.dispose();
       observer.disconnect();
-      disposables.forEach(item => item.dispose());
-      renderer.dispose();
-      renderer.forceContextLoss();
+      compiled.then(() => {
+        disposables.forEach(item => item.dispose());
+        renderer.dispose();
+        renderer.forceContextLoss();
+      });
     },
   };
 }

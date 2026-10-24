@@ -6,12 +6,15 @@ import "./GooeyNav.css";
 type Item = { label: string; href: string; icon: ReactNode };
 
 /** React Bits GooeyNav adapted for scroll-controlled selection and real link semantics. */
-export default function GooeyNav({ items, activeHref, onNavigate, className = "" }: {
+export default function GooeyNav({ items, activeHref, onNavigate, className = "", id }: {
   items: Item[]; activeHref: string; onNavigate: (event: MouseEvent<HTMLAnchorElement>, href: string) => void; className?: string;
+  /** Stable filter id; useId can differ between server and client when module chunks load in a different order. */
+  id?: string;
 }) {
   const ref = useRef<HTMLDivElement>(null);
   const effectRef = useRef<HTMLDivElement>(null);
-  const filterId = `gooey-${useId().replace(/:/g, "")}`;
+  const generatedId = useId();
+  const filterId = id ?? `gooey-${generatedId.replace(/:/g, "")}`;
   const signature = items.map(item => item.label).join("|");
 
   useEffect(() => {

@@ -85,7 +85,7 @@ export default function Navbar() {
         </a>
 
         {/* Links desktop */}
-        <GooeyNav items={links} activeHref={active} onNavigate={go} className="hidden lg:block" />
+        <GooeyNav id="gooey-desktop" items={links} activeHref={active} onNavigate={go} className="hidden lg:block" />
 
         <div className="flex items-center gap-3">
           {/* Toggle idioma */}
@@ -160,7 +160,7 @@ export default function Navbar() {
             transition={{ duration: 0.32, ease: [0.22, 1, 0.36, 1] }}
             className="overflow-hidden border-b border-white/[0.06] bg-bg/95 backdrop-blur-xl lg:hidden"
           >
-            <GooeyNav items={links} activeHref={active} onNavigate={go} className="gooey-nav--mobile mx-6 my-5" />
+            <GooeyNav id="gooey-mobile" items={links} activeHref={active} onNavigate={go} className="gooey-nav--mobile mx-6 my-5" />
           </motion.div>
         )}
       </AnimatePresence>

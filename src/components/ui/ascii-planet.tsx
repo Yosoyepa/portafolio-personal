@@ -24,6 +24,9 @@ const SPIN = 0.22; // rad/s
 const SPIN_HOVER = 0.55;
 /** Static frame for reduced motion: bands turned to a readable angle. */
 const STILL_ROTATION = 0.8;
+/** The moon circles faster than the bands turn; the offset puts it in front of the planet in the static frame. */
+const MOON_RATE = 1.6;
+const MOON_OFFSET = 0.3;
 
 type Geometry = ReturnType<typeof planetGeometry>;
 
@@ -77,7 +80,7 @@ export default function AsciiPlanet({ label, className }: AsciiPlanetProps) {
       ctx.clearRect(0, 0, canvas.width, canvas.height);
       ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
       if (phase === "waiting") return;
-      planetFrame(geo, rotation, boost, tick, chars, buckets);
+      planetFrame(geo, rotation, boost, tick, chars, buckets, rotation * MOON_RATE + MOON_OFFSET);
       counts.fill(0);
       for (let r = 0; r < rows; r++) {
         // Rows still decoding flicker as code, the front glows, the rows below are not there yet.

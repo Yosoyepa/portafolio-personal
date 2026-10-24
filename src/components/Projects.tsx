@@ -6,6 +6,7 @@ import SectionHeading from "@/components/SectionHeading";
 import AmbientBackground from "@/components/AmbientBackground";
 import BorderGlow from "@/components/reactbits/BorderGlow";
 import PortfolioIcon from "@/components/PortfolioIcon";
+import BrandIcon from "@/components/BrandIcon";
 import { useLang } from "@/components/providers/LanguageProvider";
 import { GITHUB_URL, type Content } from "@/lib/content";
 import type { ProjectCategory } from "@/lib/caseStudies";
@@ -45,7 +46,7 @@ export default function Projects() {
             {project.award && <p className="case-award"><Trophy size={15} aria-hidden />{project.award}</p>}
             <p className="case-description">{project.description}</p>
             <p className="case-proof"><ArrowRight size={15} aria-hidden />{project.proof}</p>
-            <ul className="case-stack">{project.tech.map(tech => <li key={tech}>{tech}</li>)}</ul>
+            <ul className="case-stack">{project.tech.map(tech => <li key={tech} className="brand-chip"><BrandIcon name={tech} size={12} />{tech}</li>)}</ul>
             <details className="case-details"><summary>{es ? "Decisiones y alcance" : "Decisions & scope"}<Plus size={17} aria-hidden /></summary><ul>{project.details.map(detail => <li key={detail}>{detail}</li>)}</ul></details>
             <a href={project.link} target="_blank" rel="noopener noreferrer" className="case-source" aria-label={`${project.name} · ${t.projects.viewProject}`}><GithubLogo size={18} aria-hidden />{t.projects.viewProject}<ArrowUpRight size={17} aria-hidden /></a>
           </div>

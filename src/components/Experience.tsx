@@ -5,6 +5,7 @@ import { ArrowUp, ArrowUpRight, ArrowRight, Plus, ChatCircleDots, Check, Magnify
 import SectionHeading from "@/components/SectionHeading";
 import DitherBackground from "@/components/DitherBackground";
 import BorderGlow from "@/components/reactbits/BorderGlow";
+import BrandIcon from "@/components/BrandIcon";
 import { useLang } from "@/components/providers/LanguageProvider";
 import { profileSources, retrieveProfile, type ProfileSource } from "@/lib/retrieval";
 import { scrollToId } from "@/lib/utils";
@@ -48,7 +49,7 @@ function CareerStory() {
         <p className="chapter-role">{job.role}<span> · {job.location}</span></p>
         <p className="chapter-summary">{job.summary}</p>
         <div className="chapter-impact"><Check size={20} aria-hidden /><strong>{job.impact}</strong></div>
-        <ul className="chapter-stack" aria-label={lang === "es" ? "Tecnologías aplicadas" : "Applied technologies"}>{job.stack.map(item => <li key={item}>{item}</li>)}</ul>
+        <ul className="chapter-stack" aria-label={lang === "es" ? "Tecnologías aplicadas" : "Applied technologies"}>{job.stack.map(item => <li key={item} className="brand-chip"><BrandIcon name={item} size={12} />{item}</li>)}</ul>
         <details className="chapter-contributions"><summary>{ui.contributions}<span>{job.bullets.length}<Plus size={17} aria-hidden /></span></summary><ul>{job.bullets.map(text => <li key={text}>{text}</li>)}</ul></details>
       </div>
     </BorderGlow>

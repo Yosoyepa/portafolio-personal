@@ -3,55 +3,33 @@
 import { useEffect, useRef, useState } from "react";
 import { useInView, useReducedMotion } from "motion/react";
 
-import {
-  Brain,
-  Cloud,
-  Code,
-  Coffee,
-  Coin,
-  Cube,
-  Database,
-  FileText,
-  FileTs,
-  FlowArrow,
-  Function,
-  Leaf,
-  Lightning,
-  Link,
-  MagnifyingGlass,
-  Plugs,
-  Robot,
-  Sparkle,
-  Stack,
-  Terminal,
-  Waveform,
-  Wind,
-  type Icon,
-} from "@phosphor-icons/react";
+import { Brain, Coin, FileText, FlowArrow, Robot, type Icon } from "@phosphor-icons/react";
+import BrandIcon from "@/components/BrandIcon";
 
-const ITEMS: { label: string; icon: Icon }[] = [
-  { label: "Python", icon: Code },
-  { label: "TypeScript", icon: FileTs },
-  { label: "Java", icon: Coffee },
-  { label: "Amazon Bedrock", icon: Sparkle },
+// Las tecnologías con marca muestran su logo (BrandIcon); los conceptos sin marca conservan su icono Phosphor.
+const ITEMS: { label: string; icon?: Icon }[] = [
+  { label: "Python" },
+  { label: "TypeScript" },
+  { label: "Java" },
+  { label: "Amazon Bedrock" },
   { label: "Strands Agents", icon: Robot },
-  { label: "LangChain", icon: Link },
-  { label: "FastAPI", icon: Lightning },
-  { label: "Spring Boot", icon: Leaf },
-  { label: "AWS CDK", icon: Stack },
-  { label: "ECS Fargate", icon: Cube },
-  { label: "Lambda", icon: Function },
-  { label: "DynamoDB", icon: Database },
-  { label: "Kinesis", icon: Waveform },
-  { label: "OpenSearch", icon: MagnifyingGlass },
-  { label: "Docker", icon: Terminal },
-  { label: "Airflow", icon: Wind },
+  { label: "LangChain" },
+  { label: "FastAPI" },
+  { label: "Spring Boot" },
+  { label: "AWS CDK" },
+  { label: "ECS Fargate" },
+  { label: "Lambda" },
+  { label: "DynamoDB" },
+  { label: "Kinesis" },
+  { label: "OpenSearch" },
+  { label: "Docker" },
+  { label: "Airflow" },
   { label: "RAG", icon: FileText },
-  { label: "MCP", icon: Plugs },
+  { label: "MCP" },
   { label: "LLMOps", icon: Brain },
   { label: "FinOps", icon: Coin },
   { label: "Event-Driven", icon: FlowArrow },
-  { label: "OpenTelemetry", icon: Cloud },
+  { label: "OpenTelemetry" },
 ];
 
 export default function Marquee() {
@@ -77,7 +55,7 @@ export default function Marquee() {
             key={`${item.label}-${i}`}
             className="flex items-center gap-2 whitespace-nowrap rounded-full border border-white/[0.08] bg-white/[0.03] px-4 py-2"
           >
-            <item.icon size={13} className="text-cyan/80" aria-hidden />
+            {item.icon ? <item.icon size={13} className="text-cyan/80" aria-hidden /> : <BrandIcon name={item.label} size={14} />}
             <span className="font-mono text-[11px] tracking-[0.14em] text-muted uppercase">
               {item.label}
             </span>

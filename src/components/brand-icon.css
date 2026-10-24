@@ -1,0 +1,7 @@
+/* Logos de marca (BrandIcon) y chips que los llevan. */
+.brand-icon { display: block; flex: none; }
+/* Los cuadrados de AWS Architecture Icons se suavizan a 2–3 px de radio (10–13 px de lado). */
+.brand-icon--aws { border-radius: 22%; }
+
+/* Chips de Proyectos y Experiencia: logo de 12 px + 6 px de separación; sin logo el chip no cambia. */
+.brand-chip { display: inline-flex; align-items: center; gap: 6px; }

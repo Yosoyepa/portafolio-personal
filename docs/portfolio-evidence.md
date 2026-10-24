@@ -57,3 +57,20 @@ La revisión de producción comprobó:
 - Giro de la tarjeta en escritorio y móvil, enlaces correctos a Email, LinkedIn y GitHub, y retorno con Escape que restaura el foco al botón de la portada.
 - Corrección de una observación de tamaño tardía de RippleGrid que encontraba una referencia nula al salir de Stack. El callback usa el contenedor de su propio montaje y descarta notificaciones tras desconexión; se liberan programa y geometría al desmontar. Se verificó Stack → Contacto y la misma transición cambiando a viewport móvil, sin errores de consola.
 - `pnpm test`: 17 pruebas aprobadas. `pnpm build`: exportación correcta. `git diff --check`: sin errores. Los hashes de los tres archivos de LaserFlow protegidos siguen coincidiendo con el estado anterior.
+
+## Iteración «Señal viva» (24 de octubre de 2026)
+
+Criterios, plan y cierre en `docs/tasks/T001_senal-viva.md`.
+
+- **Actividad de GitHub.** `scripts/fetch-github-activity.mjs` consulta la API GraphQL como `Yosoyepa` y guarda un
+  snapshot compacto. El total del último año (2 690) coincide con `contributionCalendar.totalContributions` (diferencia
+  0). El calendario público de github.com ya muestra las contribuciones privadas de forma anónima, así que el snapshot
+  no expone nada que no fuera público; no incluye nombres de repositorios. La barra de lenguajes usa los 29 repos
+  públicos propios y no fork, con el mismo peso por repo.
+- **Ommatix.** Textos tomados del README público (`Yosoyepa/Ommatix`, estado al 19 de octubre de 2026): prototipo de
+  investigación, contrato MCP de tres herramientas, actuación fail-closed y evaluación preliminar AG-02 con sus
+  advertencias (una serie por modelo, apps sintéticas, sin ranking).
+- **Credenciales.** Diplomado en Machine Learning y Data Science (UNAL, en curso) y Desarrollo Seguro (CC) COL
+  (Net4skills · NETEC, julio de 2026), según la memoria profesional del responsable. AgenticRank no se publica: falta
+  cotejarlo con el badge.
+- **Métrica.** «500+ commits rastreados» pasa a leer las contribuciones del último año del snapshot.

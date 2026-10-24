@@ -25,7 +25,7 @@ const jetbrains = JetBrains_Mono({
 export const metadata: Metadata = {
   title: "Juan Andrade | Senior AI Engineer",
   description:
-    "Juan Carlos Andrade Unigarro, Senior AI Engineer. Agentes de IA, inteligencia documental, backend y plataformas AWS. Explora mi trayectoria, mi actividad en GitHub y ocho proyectos con código público.",
+    "Juan Carlos Andrade Unigarro, Senior AI Engineer. Agentes de IA, inteligencia documental, backend y plataformas AWS. Explora mi trayectoria, mi actividad en GitHub y nueve proyectos con código público.",
   keywords: [
     "AI Engineer",
     "Generative AI",

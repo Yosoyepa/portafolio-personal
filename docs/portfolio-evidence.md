@@ -89,3 +89,11 @@ Criterios en `docs/tasks/T002_viaje-espacial.md`.
 - **3.er puesto.** Lo declaró el responsable el 24 de octubre de 2026; ninguno de los dos README lo menciona.
 - **Inetum.** Redactado desde la memoria profesional del responsable y anonimizado: sin nombre del cliente, sin
   versiones internas y sin datos de documentos. Pendiente de revisión del responsable antes de publicar.
+- **TryTrust.** Fuentes: memoria profesional del responsable (`hackathons_y_certificaciones_2026`, entrada NextWave);
+  repos públicos `bysergr/trytrust-platform`, `bysergr/trytrust-backend` y `bysergr/trytrust-merchants`, y el espejo
+  público `Yosoyepa/trystrus2` (enlace del caso; los cuatro comprobados con `gh` el 24 de octubre de 2026). El 3.er
+  puesto en la sede Bogotá lo declaró el responsable; la web oficial del NextWave Hackathon no publica el podio por sede.
+- **Stack actual.** Grupos de Stack, Marquee y tarjetas de Perfil tomados de la memoria profesional del responsable
+  (perfil y stack, sección «Stack actual (octubre 2026)»): OpenShift, Argo CD, Kustomize, Podman, RabbitMQ, Celery,
+  OCR local y la cadena de calidad de la plataforma documental de Inetum. Logos de Simple Icons 16.35.0; Kustomize,
+  Gitleaks, Hadolint, import-linter, PyMuPDF, RapidOCR y Tesseract no tienen icono en esa versión y se muestran sin logo.

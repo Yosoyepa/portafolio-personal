@@ -11,7 +11,7 @@ import { useLang } from "@/components/providers/LanguageProvider";
 import { GITHUB_URL, type Content } from "@/lib/content";
 import type { ProjectCategory } from "@/lib/caseStudies";
 
-const ACCENTS: Record<string, string> = { ommatix: "#8fd0ff", cloudpath: "#9fe1c8", wct: "#b8a2f2", assistant: "#9be3d4", oracle: "#ebc692", rag: "#9ac2ed", biostock: "#9dd2b4", codeguard: "#b9b3f2" };
+const ACCENTS: Record<string, string> = { ommatix: "#8fd0ff", cloudpath: "#9fe1c8", trytrust: "#9cc9ff", wct: "#b8a2f2", assistant: "#9be3d4", oracle: "#ebc692", rag: "#9ac2ed", biostock: "#9dd2b4", codeguard: "#b9b3f2" };
 
 function ProjectDiagram({ project }: { project: Content["projects"]["items"][number] }) {
   return <div className={`case-art case-art--${project.id}`} aria-hidden="true">
@@ -21,7 +21,7 @@ function ProjectDiagram({ project }: { project: Content["projects"]["items"][num
       {project.flow.map((label, i) => <div className="case-flow-step" key={label}><div className="case-flow-node"><PortfolioIcon name={i === 0 ? "code" : i === 1 ? (project.category === "cloud" ? "cloud" : "ai") : "stack"} width={i === 1 ? 34 : 23} height={i === 1 ? 34 : 23} /></div><span>{label}</span></div>)}
       <svg className="case-flow-lines" viewBox="0 0 300 60" preserveAspectRatio="none"><path d="M25 30H275" /><path className="case-flow-pulse" d="M25 30H275" /></svg>
     </div>
-    <span className="case-art-signature">{project.id === "ommatix" ? "an id and a revision, not a coordinate." : project.id === "cloudpath" ? "a route that listens." : project.id === "wct" ? "write. check. trust." : project.id === "assistant" ? "state → action → evidence" : project.id === "oracle" ? "a little mystery. a lot of engineering." : project.id === "rag" ? "every answer has a source." : project.id === "biostock" ? "infrastructure, as code." : "understand the code you ship."}</span>
+    <span className="case-art-signature">{project.id === "ommatix" ? "an id and a revision, not a coordinate." : project.id === "cloudpath" ? "a route that listens." : project.id === "trytrust" ? "no signature, no purchase." : project.id === "wct" ? "write. check. trust." : project.id === "assistant" ? "state → action → evidence" : project.id === "oracle" ? "a little mystery. a lot of engineering." : project.id === "rag" ? "every answer has a source." : project.id === "biostock" ? "infrastructure, as code." : "understand the code you ship."}</span>
   </div>;
 }
 

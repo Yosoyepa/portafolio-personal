@@ -40,7 +40,9 @@ for (const lang of ['es', 'en']) {
   });
   test(`${lang}: queries retrieve new public cases and preserve scope`, () => {
     assert.equal(retrieveProfile('Write Check Trust', sources)[0].title, 'Write, Check, Trust');
-    assert.equal(retrieveProfile('SKIP LOCKED', sources)[0].title, 'Personal Assistant');
+    // Personal Assistant y TryTrust usan SKIP LOCKED; ambos deben salir como fuente.
+    const skipLocked = retrieveProfile('SKIP LOCKED', sources).map(source => source.title);
+    assert.ok(skipLocked.includes('Personal Assistant') && skipLocked.includes('TryTrust'), skipLocked.join(', '));
     assert.equal(retrieveProfile('OCR', sources)[0].title, 'Inetum Colombia S.A.S');
     const original = JSON.stringify(sources);
     const first = retrieveProfile('Personal Assistant', sources);
@@ -59,9 +61,9 @@ test('both languages preserve the same credentials and all three career stages',
 test('the curated projects retain their identities, repo links and maturity in both languages', () => {
   const es = content.es.projects.items;
   const en = content.en.projects.items;
-  assert.equal(es.length, 8);
+  assert.equal(es.length, 9);
   assert.deepEqual(es.map(p => p.id), en.map(p => p.id));
-  assert.equal(new Set(es.map(p => p.id)).size, 8);
+  assert.equal(new Set(es.map(p => p.id)).size, 9);
   for (const [index, project] of es.entries()) {
     assert.match(project.link, /^https:\/\/github\.com\/Yosoyepa\/[^/]+$/);
     assert.equal(project.link, en[index].link);
@@ -74,6 +76,10 @@ test('the curated projects retain their identities, repo links and maturity in b
   assert.equal(es.find(p => p.id === 'oracle').link, 'https://github.com/Yosoyepa/secret-oracle-hackathon-aws');
   assert.equal(es.find(p => p.id === 'ommatix').link, 'https://github.com/Yosoyepa/Ommatix');
   assert.equal(es.find(p => p.id === 'cloudpath').link, 'https://github.com/Yosoyepa/cloudpath-front');
+  assert.equal(es.find(p => p.id === 'trytrust').link, 'https://github.com/Yosoyepa/trystrus2');
+  assert.equal(es[2].id, 'trytrust');
+  assert.match(es.find(p => p.id === 'trytrust').award, /NextWave/);
+  assert.match(en.find(p => p.id === 'trytrust').award, /3rd place/);
   assert.deepEqual(es.filter(p => p.featured).map(p => p.id), ['ommatix', 'cloudpath']);
   assert.deepEqual(en.filter(p => p.featured).map(p => p.id), ['ommatix', 'cloudpath']);
 });

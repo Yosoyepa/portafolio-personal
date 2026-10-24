@@ -1,6 +1,6 @@
 import type { SVGProps } from "react";
 
-export type PortfolioIconName = "profile" | "journey" | "projects" | "stack" | "award" | "contact" | "code" | "ai" | "data" | "cloud";
+export type PortfolioIconName = "profile" | "journey" | "projects" | "stack" | "award" | "contact" | "code" | "ai" | "data" | "cloud" | "activity";
 
 /** Original geometric SVG family, inspired by Spectrum's orbital and modular shapes. */
 export default function PortfolioIcon({ name, ...props }: SVGProps<SVGSVGElement> & { name: PortfolioIconName }) {
@@ -15,6 +15,7 @@ export default function PortfolioIcon({ name, ...props }: SVGProps<SVGSVGElement
     ai: <><path d="M16 2c0 9 5 14 14 14-9 0-14 5-14 14 0-9-5-14-14-14C11 16 16 11 16 2Z" fill="currentColor" fillOpacity=".15" /><circle cx="16" cy="16" r="3" /></>,
     data: <><ellipse cx="16" cy="7" rx="11" ry="4" /><path d="M5 7v17c0 5 22 5 22 0V7M5 15c0 5 22 5 22 0" /><path d="M11 21h.1M16 22h.1" strokeWidth="3" /></>,
     cloud: <><path d="M9 24a7 7 0 1 1 0-14 9 9 0 0 1 17 3 6 6 0 0 1-1 11" /><path d="M16 29V15m-5 5 5-5 5 5" /></>,
+    activity: <><rect x="4" y="4" width="6" height="6" rx="1.5" /><rect x="13" y="4" width="6" height="6" rx="1.5" fill="currentColor" fillOpacity=".3" /><rect x="22" y="4" width="6" height="6" rx="1.5" /><rect x="4" y="13" width="6" height="6" rx="1.5" fill="currentColor" fillOpacity=".3" /><rect x="13" y="13" width="6" height="6" rx="1.5" /><rect x="22" y="13" width="6" height="6" rx="1.5" fill="currentColor" /><rect x="4" y="22" width="6" height="6" rx="1.5" /><rect x="13" y="22" width="6" height="6" rx="1.5" fill="currentColor" /><rect x="22" y="22" width="6" height="6" rx="1.5" fill="currentColor" fillOpacity=".3" /></>,
   };
   return <svg viewBox="0 0 32 32" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true" focusable="false" {...props}>{shapes[name]}</svg>;
 }

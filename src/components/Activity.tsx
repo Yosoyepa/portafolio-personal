@@ -43,7 +43,7 @@ const LABELS = {
  *  busier days are brighter, not darker. */
 const ES_STRINGS: Partial<ActivityHeatmapStrings> = {
   in: "en", none: "Sin", to: "a", orMore: "o más", day: "día", days: "días", with: "con", less: "Menos", more: "Más",
-  highlightGroup: "Resaltar días por nivel", highlightDays: "Resaltar días con", legend: "Los cuadros más intensos indican más", levels: "Niveles",
+  highlightGroup: "Resaltar días por nivel", highlightDays: "Resaltar días:", legend: "Los cuadros más intensos indican más", levels: "Niveles",
 };
 const EN_STRINGS: Partial<ActivityHeatmapStrings> = { legend: "Brighter squares mean more" };
 
@@ -288,15 +288,19 @@ function ProfileCard({ lang }: { lang: "es" | "en" }) {
   );
 }
 
+/** The range switch offers the last 12 months and the two most recent calendar years. Older years hold a handful of
+ *  contributions and leave gaps (2024 is a real zero) that read like missing data; the snapshot keeps them all. */
+const RANGES = snapshot.ranges.filter((range, index, all) => range.id === "last-year" || all.filter(item => item.id !== "last-year").indexOf(range) < 2);
+
 function ActivityPanel({ lang }: { lang: "es" | "en" }) {
   const ui = LABELS[lang];
   const reduced = useReducedMotionSafe();
   const host = useRef<HTMLDivElement>(null);
   const inView = useInView(host, { once: true, amount: 0.35 });
-  const [rangeId, setRangeId] = useState(snapshot.ranges[0].id);
+  const [rangeId, setRangeId] = useState(RANGES[0].id);
   const [back, setBack] = useState(false);
   const [selected, setSelected] = useState<string | null>(null);
-  const range = snapshot.ranges.find(item => item.id === rangeId) ?? snapshot.ranges[0];
+  const range = RANGES.find(item => item.id === rangeId) ?? RANGES[0];
 
   const stats = useMemo(() => {
     const { counts } = range;
@@ -320,7 +324,7 @@ function ActivityPanel({ lang }: { lang: "es" | "en" }) {
   const selectedCount = range.counts[selectedIndex] ?? 0;
 
   const choose = (id: string) => {
-    const next = snapshot.ranges.find(item => item.id === id);
+    const next = RANGES.find(item => item.id === id);
     if (!next || next.id === range.id) return;
     // Like the heatmap's sweep: forward for a later range, back for an earlier one.
     setBack(next.start < range.start);
@@ -349,7 +353,7 @@ function ActivityPanel({ lang }: { lang: "es" | "en" }) {
           onSelectDate={setSelected}
           actions={
             <div className="segmented-control gh-ranges" role="group" aria-label={ui.ranges}>
-              {snapshot.ranges.map(item => (
+              {RANGES.map(item => (
                 <button key={item.id} type="button" aria-pressed={item.id === range.id} onClick={() => choose(item.id)}>
                   {item.id === range.id && <motion.span className="segment-indicator" layoutId="gh-range" transition={reduced ? { duration: 0 } : { type: "spring", stiffness: 380, damping: 34 }} />}
                   <span className="relative">{item.id === "last-year" ? ui.lastYear : item.id}</span>
@@ -371,7 +375,7 @@ function ActivityPanel({ lang }: { lang: "es" | "en" }) {
           {selected ? (
             <span key={selected} className="gh-log-entry">
               <span className="gh-log-dot" aria-hidden="true">●</span>{" "}
-              <span className="gh-log-hash">{selected}</span>{" "}
+              <span className="gh-log-hash" aria-hidden="true">{selected}</span>{" "}
               <span className="gh-log-sep" aria-hidden="true">·</span>{" "}
               {longDate.format(utc(selected))}{" "}
               <span className="gh-log-sep" aria-hidden="true">·</span>{" "}

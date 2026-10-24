@@ -147,7 +147,7 @@
   .gh-identity { padding-top: 8px; }
 }
 @media (max-width: 767px) {
-  .gh-activity .gh-ranges { display: grid; width: 100cqi; grid-template-columns: repeat(4, minmax(0, 1fr)); }
+  .gh-activity .gh-ranges { display: grid; width: 100cqi; grid-template-columns: repeat(3, minmax(0, 1fr)); }
   .gh-activity .gh-ranges button { min-height: 38px; padding: 6px 4px; font-size: 10.5px; line-height: 1.2; }
 }
 @media (max-width: 639px) {
@@ -160,4 +160,9 @@
   .gh-months { gap: 4px; min-height: 76px; }
   .gh-months li:nth-child(even) .gh-month-label { visibility: hidden; }
   .gh-log { font-size: 11px; }
+}
+
+/* Movimiento reducido: las barras aparecen a la vez, sin el escalonado. */
+@media (prefers-reduced-motion: reduce) {
+  .gh-lang-bar i, .gh-month-bar i, .gh-activity [role="gridcell"]::after { transition-delay: 0s !important; }
 }

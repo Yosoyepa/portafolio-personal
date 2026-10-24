@@ -69,6 +69,12 @@ section[id] {
   scroll-margin-top: 5.5rem;
 }
 
+/* Al tabular, el control enfocado no queda debajo de la cabecera fija (WCAG 2.4.11) */
+main :is(a, button, input, select, textarea, summary, [tabindex]) {
+  scroll-margin-top: 6.5rem;
+  scroll-margin-bottom: 1.5rem;
+}
+
 /* Skip link accesible */
 .skip-link {
   position: fixed;

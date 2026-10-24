@@ -47,6 +47,7 @@ export default function Navbar() {
     { label: t.nav.about, href: "#perfil", icon: <PortfolioIcon name="profile" /> },
     { label: t.nav.experience, href: "#experiencia", icon: <PortfolioIcon name="journey" /> },
     { label: t.nav.projects, href: "#proyectos", icon: <PortfolioIcon name="projects" /> },
+    { label: t.nav.activity, href: "#actividad", icon: <PortfolioIcon name="activity" /> },
     { label: t.nav.stack, href: "#stack", icon: <PortfolioIcon name="stack" /> },
     { label: t.nav.certifications, href: "#certificaciones", icon: <PortfolioIcon name="award" /> },
     { label: t.nav.contact, href: "#contacto", icon: <PortfolioIcon name="contact" /> },

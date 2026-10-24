@@ -1,11 +1,12 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import { useEffect, useMemo, useRef } from "react";
 import { animate, useInView, useReducedMotion } from "motion/react";
 import { useLang } from "@/components/providers/LanguageProvider";
 
 export default function Metrics() {
-  const { t } = useLang();
+  const { t, lang } = useLang();
+  const format = useMemo(() => new Intl.NumberFormat(lang === "es" ? "es-CO" : "en-US").format, [lang]);
   const ref = useRef<HTMLDivElement>(null);
   const inView = useInView(ref, { margin: "0px 0px -10% 0px", once: true });
   const reduce = useReducedMotion();
@@ -17,18 +18,18 @@ export default function Metrics() {
     const counters = ref.current?.querySelectorAll<HTMLElement>("[data-count]");
     if (!counters?.length) return;
     if (reduce) {
-      counters.forEach((el) => { el.textContent = String(Number(el.dataset.count ?? "0")); });
+      counters.forEach((el) => { el.textContent = format(Number(el.dataset.count ?? "0")); });
       return;
     }
     const running = Array.from(counters).map((el) =>
       animate(0, Number(el.dataset.count ?? "0"), {
         duration: 1.6,
         ease: [0.33, 1, 0.68, 1],
-        onUpdate: (v) => { el.textContent = String(Math.round(v)); },
+        onUpdate: (v) => { el.textContent = format(Math.round(v)); },
       }),
     );
     return () => running.forEach((controls) => controls.stop());
-  }, [inView, reduce]);
+  }, [inView, reduce, format]);
 
   return (
     <div ref={ref} className="relative isolate overflow-hidden border-b border-white/[0.06] bg-panel/50">

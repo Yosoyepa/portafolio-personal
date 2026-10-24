@@ -1,5 +1,6 @@
 import { caseStudies } from "./caseStudies.ts";
 import career from "./career.ts";
+import activity from "../data/github-activity.json" with { type: "json" };
 
 /**
  * Contenido bilingüe (ES/EN) del portafolio de Juan Carlos Andrade Unigarro.
@@ -8,6 +9,9 @@ import career from "./career.ts";
  */
 
 export type Lang = "es" | "en";
+
+// Contribuciones de GitHub del último año, del snapshot que genera scripts/fetch-github-activity.mjs.
+const contributionsLastYear = activity.ranges.find(range => range.id === "last-year")?.total ?? 0;
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Datos de contacto
@@ -39,7 +43,7 @@ const es = {
   metrics: {
     items: [
       { value: 20, suffix: "+", label: "Repositorios con contribuciones" },
-      { value: 500, suffix: "+", label: "Commits rastreados" },
+      { value: contributionsLastYear, suffix: "", label: "Contribuciones en GitHub en el último año" },
       { value: 16, suffix: "+", label: "Componentes de IA en producción" },
       { value: 8, suffix: "", label: "Credenciales y microcredenciales AWS" },
     ],
@@ -169,7 +173,7 @@ const en: typeof es = {
   metrics: {
     items: [
       { value: 20, suffix: "+", label: "Repositories contributed to" },
-      { value: 500, suffix: "+", label: "Tracked commits" },
+      { value: contributionsLastYear, suffix: "", label: "GitHub contributions in the last year" },
       { value: 16, suffix: "+", label: "AI components in production" },
       { value: 8, suffix: "", label: "AWS credentials & microcredentials" },
     ],

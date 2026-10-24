@@ -3,6 +3,7 @@ import assert from 'node:assert/strict';
 import {
   PLANET_RAMP, DECODE_GLYPHS, STAR_GLYPHS, BUCKETS, BUCKET_COLORS, gridRows, hexToRgb, mixRgb, rampIndex,
   sphereShade, bandValue, ringAt, ringDensity, starField, twinkle, planetGeometry, planetFrame, revealRow, scrambleIndex,
+  CHARS, RING_GLYPHS, moonAt,
 } from '../src/lib/asciiPlanet.mjs';
 
 test('ramp: dark to light, starts blank, unique glyphs; luminance maps onto it monotonically', () => {
@@ -62,6 +63,7 @@ test('bands: latitude stripes with deterministic noise that drift as the planet 
 
 test('ring: elliptical, tilted, and occluded correctly in front of and behind the planet', () => {
   const opts = { radius: 0.4, inner: 1.3, outer: 1.95, tilt: 0.32, roll: 0 };
+  assert.deepEqual([...RING_GLYPHS], ['·', '-', '~', '=']);
   // Far left and right on the horizon line are on the ring; straight above the planet is not.
   assert.ok(ringAt(-0.7, 0, opts));
   assert.ok(ringAt(0.7, 0, opts));
@@ -74,7 +76,7 @@ test('ring: elliptical, tilted, and occluded correctly in front of and behind th
   assert.ok(below && below.front);
   assert.ok(above && !above.front);
   assert.ok(ringDensity(1.5) >= 0 && ringDensity(1.5) <= 1);
-  assert.ok(ringDensity(1.64) < ringDensity(1.5), 'a Cassini-like gap');
+  assert.ok(ringDensity(1.5) < ringDensity(1.38), 'a Cassini-like gap');
   assert.equal(ringDensity(1.1), 0);
   assert.equal(ringDensity(2.1), 0);
 });
@@ -125,4 +127,69 @@ test('decode: rows reveal top to bottom inside the duration; scramble is determi
   for (let r = 1; r < 29; r++) assert.ok(revealRow(r, 29, 1000) > revealRow(r - 1, 29, 1000));
   assert.equal(scrambleIndex(10, 3, DECODE_GLYPHS.length), scrambleIndex(10, 3, DECODE_GLYPHS.length));
   for (let i = 0; i < 50; i++) { const k = scrambleIndex(i, 5, 7); assert.ok(k >= 0 && k < 7); }
+});
+
+test('round 2: a large centred disc, a readable night side, a thin ring with varied glyphs', () => {
+  const cols = 58, rows = 29;
+  const geo = planetGeometry(cols, rows);
+  const chars = new Uint8Array(cols * rows), buckets = new Uint8Array(cols * rows);
+  planetFrame(geo, 0, 0, 0, chars, buckets);
+  // Disc: 55–60 % of the width.
+  const discCols = [];
+  for (let i = 0; i < chars.length; i++) if (geo.planet[i]) discCols.push(i % cols);
+  const width = (Math.max(...discCols) - Math.min(...discCols) + 1) / cols;
+  assert.ok(width >= 0.53 && width <= 0.62, `disc width ${width}`);
+  // Every disc cell not covered by the near ring shows a glyph: the night side stays readable.
+  let blank = 0, night = 0;
+  for (let i = 0; i < chars.length; i++) {
+    if (!geo.planet[i] || (geo.ring[i] >= 0 && geo.ringFront[i])) continue;
+    if (!chars[i]) blank++;
+    if (geo.shade[i] < 0.02) { night++; assert.ok('.:'.includes(CHARS[chars[i]]), CHARS[chars[i]]); assert.ok(buckets[i] <= BUCKETS.BODY + 1); }
+  }
+  assert.equal(blank, 0);
+  assert.ok(night > 10);
+  // Planet + ring centred: empty margins above and below differ by at most one row, left and right by two columns.
+  const used = [];
+  for (let i = 0; i < chars.length; i++) if (geo.planet[i] || geo.ring[i] >= 0) used.push(i);
+  const rs = used.map(i => (i / cols) | 0), cs = used.map(i => i % cols);
+  assert.ok(Math.abs(Math.min(...rs) - (rows - 1 - Math.max(...rs))) <= 1);
+  assert.ok(Math.abs(Math.min(...cs) - (cols - 1 - Math.max(...cs))) <= 2);
+  // Thin, near edge-on ring: its screen height is about a third of its width or less.
+  const ringRows = [], ringCols = [];
+  for (let i = 0; i < chars.length; i++) if (geo.ring[i] >= 0) { ringRows.push((i / cols) | 0); ringCols.push(i % cols); }
+  const h = (Math.max(...ringRows) - Math.min(...ringRows) + 1) / rows, w = (Math.max(...ringCols) - Math.min(...ringCols) + 1) / cols;
+  assert.ok(h / w < 0.5, `ring h/w ${h / w}`);
+  // Glyph variety on the ring, and the far half only outside the disc.
+  const ringGlyphs = new Set();
+  for (let i = 0; i < chars.length; i++) {
+    if (buckets[i] !== BUCKETS.RING && buckets[i] !== BUCKETS.RING_DIM) continue;
+    if (!chars[i]) continue;
+    ringGlyphs.add(CHARS[chars[i]]);
+    if (geo.planet[i]) assert.equal(geo.ringFront[i], 1, 'the far half hides behind the disc');
+  }
+  assert.ok(ringGlyphs.size >= 3, [...ringGlyphs].join(''));
+  for (const g of ringGlyphs) assert.ok(RING_GLYPHS.includes(g));
+});
+
+test('moon: orbits, passing in front of and behind the planet', () => {
+  let front = 0, back = 0;
+  for (let k = 0; k < 64; k++) {
+    const m = moonAt((k / 64) * Math.PI * 2);
+    assert.ok(Math.abs(m.x) < 0.97 && Math.abs(m.y) < 0.97);
+    if (m.front) front++; else back++;
+  }
+  assert.ok(front > 10 && back > 10);
+  assert.deepEqual(moonAt(1.3), moonAt(1.3));
+  // Behind the disc it is hidden, in front it covers the body.
+  const cols = 58, rows = 29, geo = planetGeometry(cols, rows);
+  const chars = new Uint8Array(cols * rows), buckets = new Uint8Array(cols * rows);
+  const cellOf = m => Math.floor((m.y + 1) / 2 * rows) * cols + Math.floor((m.x + 1) / 2 * cols);
+  let phase = 0, m;
+  for (; phase < 7; phase += 0.01) { m = moonAt(phase); if (m.front && geo.planet[cellOf(m)]) break; }
+  planetFrame(geo, 0, 0, 0, chars, buckets, phase);
+  assert.ok(geo.planet[cellOf(m)] && chars[cellOf(m)]);
+  assert.equal(buckets[cellOf(m)], BUCKETS.MOON);
+  for (; phase < 14; phase += 0.01) { m = moonAt(phase); if (!m.front && geo.planet[cellOf(m)] && !(geo.ring[cellOf(m)] >= 0)) break; }
+  planetFrame(geo, 0, 0, 0, chars, buckets, phase);
+  assert.notEqual(buckets[cellOf(m)], BUCKETS.MOON);
 });

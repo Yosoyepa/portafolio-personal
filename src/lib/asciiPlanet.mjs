@@ -6,17 +6,19 @@ export const PLANET_RAMP = " .:-=+*o#%@";
 export const STAR_GLYPHS = ".·+*";
 /** Glyphs that flicker in rows that are still "decoding". */
 export const DECODE_GLYPHS = "01<>/{}[]=+*";
+/** Ring glyphs, sparse → dense. */
+export const RING_GLYPHS = "·-~=";
 /** Every glyph the canvas draws; a cell stores an index into it (0 = blank). */
-export const CHARS = PLANET_RAMP + STAR_GLYPHS + DECODE_GLYPHS;
+export const CHARS = PLANET_RAMP + STAR_GLYPHS + RING_GLYPHS + DECODE_GLYPHS;
 const STAR_BASE = PLANET_RAMP.length;
-const RING_GLYPH = PLANET_RAMP.indexOf(':');
-export const DECODE_BASE = STAR_BASE + STAR_GLYPHS.length;
+const RING_BASE = STAR_BASE + STAR_GLYPHS.length;
+export const DECODE_BASE = RING_BASE + RING_GLYPHS.length;
 
-const BODY_TONES = 7;
+const BODY_TONES = 6;
 /** Colour buckets: one `fillStyle` each. */
 export const BUCKETS = Object.freeze({
   BODY: 0, BODY_TONES, RING_DIM: BODY_TONES, RING: BODY_TONES + 1, RIM: BODY_TONES + 2, STAR: BODY_TONES + 3,
-  FRONT: BODY_TONES + 4, COUNT: BODY_TONES + 5,
+  FRONT: BODY_TONES + 4, MOON: BODY_TONES + 5, COUNT: BODY_TONES + 6,
 });
 
 const clamp01 = v => (v < 0 ? 0 : v > 1 ? 1 : v);
@@ -34,7 +36,7 @@ const toHex = rgb => '#' + rgb.map(v => v.toString(16).padStart(2, '0')).join(''
 const BODY_DARK = hexToRgb('#2a1b52'), BODY_LIGHT = hexToRgb('#b9a5ff');
 export const BUCKET_COLORS = [
   ...Array.from({ length: BODY_TONES }, (_, k) => toHex(mixRgb(BODY_DARK, BODY_LIGHT, k / (BODY_TONES - 1)))),
-  '#7f70b8', '#cdbdff', '#9ff3f0', '#adf3ed', '#eafcff',
+  '#7f70b8', '#cdbdff', '#9ff3f0', '#adf3ed', '#eafcff', '#e4dcff',
 ];
 
 /** Rows for `cols` columns so that cells of `charAspect` em × `lineHeight` em fill a square. */
@@ -73,8 +75,8 @@ export function bandValue(lat, lon, rotation) {
 
 /** Ring opacity at radius `r` (planet radii): soft edges and a Cassini-like gap. */
 export function ringDensity(r) {
-  const body = smoothstep(1.27, 1.38, r) * (1 - smoothstep(1.84, 1.98, r));
-  const gap = 1 - 0.85 * (1 - smoothstep(0, 0.07, Math.abs(r - 1.64)));
+  const body = smoothstep(1.18, 1.28, r) * (1 - smoothstep(1.58, 1.68, r));
+  const gap = 1 - 0.85 * (1 - smoothstep(0, 0.05, Math.abs(r - 1.5)));
   const ripple = 0.9 + 0.1 * Math.sin(r * 17);
   return clamp01(body * gap * ripple);
 }
@@ -122,7 +124,17 @@ export function twinkle(star, t) {
   return level < 0 ? ' ' : STAR_GLYPHS[Math.min(STAR_GLYPHS.length - 1, level)];
 }
 
-const DEFAULTS = { radius: 0.47, inner: 1.3, outer: 1.95, tilt: 0.36, roll: -0.3, stars: 36, seed: 7 };
+// Disc ≈ 57 % of the width; ring seen ~72° from face-on (elevation 0.3 rad).
+const DEFAULTS = { radius: 0.57, inner: 1.2, outer: 1.66, tilt: 0.3, roll: -0.28, stars: 36, seed: 7 };
+
+const MOON = { orbit: 0.84, flatten: 0.36, roll: 0.22, radius: 0.075 };
+
+/** Screen position of the moon at orbital angle `phase`; `front` on the near half of its orbit. */
+export function moonAt(phase) {
+  const u = MOON.orbit * Math.cos(phase), v = MOON.orbit * MOON.flatten * Math.sin(phase);
+  const c = Math.cos(MOON.roll), s = Math.sin(MOON.roll);
+  return { x: u * c - v * s, y: u * s + v * c, front: Math.sin(phase) >= 0 };
+}
 
 /** Per-cell geometry that does not change while the planet turns. */
 export function planetGeometry(cols, rows, options = {}) {
@@ -161,22 +173,31 @@ export function planetGeometry(cols, rows, options = {}) {
 
 /**
  * Fills `chars` (indices into CHARS) and `buckets` (colour bucket per cell) for one frame.
- * `rotation` turns the bands, `boost` ∈ [0, 1] brightens the ring, `tick` drives the stars.
+ * `rotation` turns the bands, `boost` ∈ [0, 1] brightens the ring, `tick` drives the stars, `moonPhase` places the moon.
+ * @param {ReturnType<typeof planetGeometry>} geo
+ * @param {number} rotation
+ * @param {number} boost
+ * @param {number} tick
+ * @param {Uint8Array} chars
+ * @param {Uint8Array} buckets
+ * @param {number | null} [moonPhase]
  */
-export function planetFrame(geo, rotation, boost, tick, chars, buckets) {
-  const { planet, rim, lat, lon, shade, ring, ringTheta, ringFront, star, stars } = geo;
+export function planetFrame(geo, rotation, boost, tick, chars, buckets, moonPhase = null) {
+  const { cols, rows, planet, rim, lat, lon, shade, ring, ringTheta, ringFront, star, stars } = geo;
   const ringGain = 0.62 + 0.38 * boost;
   for (let i = 0; i < chars.length; i++) {
     const d = ring[i];
     if (d >= 0 && (ringFront[i] || !planet[i])) {
       const v = d * ringGain * (0.86 + 0.14 * Math.sin(6 * ringTheta[i] + 0.8 * rotation));
-      // The ring keeps to a narrow, flat run of the ramp (: - = + *) so it reads as one band.
-      chars[i] = RING_GLYPH + Math.min(4, Math.round(v * 4.4));
+      const g = v > 0.72 ? 3 : v > 0.48 ? (Math.sin(9 * ringTheta[i] - 1.1 * rotation) > 0.2 ? 2 : 1) : v > 0.3 ? 1 : 0;
+      chars[i] = RING_BASE + g;
       buckets[i] = v > 0.5 ? BUCKETS.RING : BUCKETS.RING_DIM;
       continue;
     }
     if (planet[i]) {
-      const v = 0.1 + 0.9 * shade[i] * (0.5 + 0.5 * bandValue(lat[i], lon[i], rotation));
+      // A little ambient light keeps the night side readable as faint '.' and ':'.
+      const band = bandValue(lat[i], lon[i], rotation);
+      const v = 0.13 + 0.08 * band + 0.79 * shade[i] * (0.5 + 0.5 * band);
       if (rim[i]) {
         chars[i] = rampIndex(Math.max(v, 0.6));
         buckets[i] = BUCKETS.RIM;
@@ -194,6 +215,19 @@ export function planetFrame(geo, rotation, boost, tick, chars, buckets) {
       continue;
     }
     chars[i] = 0;
+  }
+  if (moonPhase === null) return;
+  const m = moonAt(moonPhase);
+  const c0 = Math.max(0, Math.floor(((m.x - MOON.radius + 1) / 2) * cols)), c1 = Math.min(cols - 1, Math.floor(((m.x + MOON.radius + 1) / 2) * cols));
+  const r0 = Math.max(0, Math.floor(((m.y - MOON.radius + 1) / 2) * rows)), r1 = Math.min(rows - 1, Math.floor(((m.y + MOON.radius + 1) / 2) * rows));
+  for (let r = r0; r <= r1; r++) for (let c = c0; c <= c1; c++) {
+    const i = r * cols + c;
+    const nx = (((c + 0.5) / cols) * 2 - 1 - m.x) / MOON.radius, ny = (((r + 0.5) / rows) * 2 - 1 - m.y) / MOON.radius;
+    const d = nx * nx + ny * ny;
+    // Behind, the disc and the near ring hide it.
+    if (d > 1.15 || (!m.front && (planet[i] || (ring[i] >= 0 && ringFront[i])))) continue;
+    chars[i] = rampIndex(0.3 + 0.7 * sphereShade(nx, ny, Math.sqrt(Math.max(0, 1 - d))));
+    buckets[i] = BUCKETS.MOON;
   }
 }
 

@@ -13,6 +13,9 @@
   text-shadow: 0 0 1px #070b13, 0 0 4px #070b13, 0 0 9px #070b13cc, 0 2px 16px #070b13;
 }
 
+/* The server HTML carries the Motion button; with reduced motion it is removed after hydration, hidden until then. */
+@media (prefers-reduced-motion: reduce) { .signal-art-footer button { visibility: hidden; } }
+
 @media (max-width: 800px) {
   .hero-data-rain .dr-vignette {
     background:

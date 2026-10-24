@@ -117,4 +117,30 @@ Rutas exclusivas por worker: ver cada brief. Ningún worker edita `src/lib/conte
 
 ## Cierre
 
-_(se rellena al final)_
+2026-10-24 · `main` en `cd98150`, sin push. Ramas integradas: `w-brand` (`a88f0be`), `w-activity` (`85e9d7d`),
+`w-rain-ascii` (`1b1ed46`). Checks re-ejecutados por el arquitecto sobre `main`, no tomados de los informes.
+
+| Ítem | Estado | Evidencia |
+|---|---|---|
+| I1 Heatmap fiel + datos reales | **Cumplido** | `git diff c99d86f HEAD -- src/components/ui/activity-heatmap-utils/` vacío (reglas originales intactas, tema por variables en `.gh-activity`). Total `last-year` del JSON 2 690 = `contributionCalendar.totalContributions` (diferencia 0). ES/EN con `strings`; en EN solo cambia la leyenda accesible («Brighter squares mean more», tema oscuro). |
+| I2 Animación tipo commit y a11y | **Cumplido** | Ola, barrido por rango, números que ruedan, pulso del último día y comando tecleado. Prueba ciega: con teclado, Tab → ← ↑ ↑ → Enter anuncia «jueves, 15 de octubre de 2026 · 172 contribuciones» (ES y EN). Movimiento reducido sin tecleo ni pulso; el escalonado de las barras se quitó en la ronda de fricción. |
+| I3 DataRain en el hero | **Cumplido** | `StarField` borrado. Frames de rAF en 1 s: 0 en pausa, 0 fuera de vista, 0 con pestaña oculta (informe w-rain-ascii). 70,4 fps a 1440×900 (DPR 1 y 2) y 60 fps en móvil con CPU ×4 tras `maxDpr 1.5`, `maxPixels 1.4e6` y 800 líneas bajo 768 px. Contraste p99 junto a los glifos ≥ 6:1 en todos los casos. |
+| I3 · contraste de zona completa | **Aceptado por alcance** | Con el cursor barriendo justo la descripción, el p99 de la zona entera baja a 3,9:1 por estelas de 1 px entre líneas; el p95 de zona y el p99 junto a los glifos sí superan 4,5:1. Llegar a 4,5 en p99 de zona exigiría un velo del ~85 % que apaga el efecto. |
+| I4 Retrato ASCII | **Cumplido** | Generado en cliente desde el WebP; `role="img"` con `aria-label` ES/EN; 0 frames en reposo; estático con movimiento reducido. Montado a 96 columnas (a 72 la cara apenas se reconocía). |
+| I5 Logos reales | **Cumplido** | 47 de 77 etiquetas con logo (Simple Icons 16.35.0 y 17 SVG de AWS Architecture Icons `Icon-package_07312026`); oscuros aclarados a `#e6edf3`; fuentes y licencias en `docs/visual-assets.md`. |
+| I6 Contenido veraz | **Cumplido** | Ommatix desde su README público; credenciales desde la memoria del responsable; métrica desde el snapshot. Sin AgenticRank ni cliente bancario. Fuentes en `docs/portfolio-evidence.md`. |
+| I7 Calidad y presupuesto | **Cumplido** | `node --test`: 42/42. `tsc --noEmit`: 0 errores. `pnpm build`: exporta; First Load JS de `/` **249 kB** (≤ 265). Export servido: 0 errores de consola y 0 px de scroll horizontal en 1440×900, 768×1024 y 390×844, con y sin movimiento reducido, ES y EN (12 casos). Hashes de LaserFlow y ProfileLaser idénticos. |
+| I8 Gates irreversibles | **Cumplido** | Sin push, deploy ni PR. |
+
+### Prueba ciega (w-blind, Opus 5.5 xhigh, sin contexto)
+Resolvió las 3 tareas reales (dato de 2025 = 329 y racha de 6 días; tesis = Ommatix, MCP, enlace correcto; día
+récord solo con teclado en ES y EN). De sus 19 fricciones se corrigieron en `cd98150`: botón enfocado bajo la cabecera
+(media), falta de «Actividad» en el menú (media), años casi vacíos en el selector, leyenda ES «con sin», anuncio con
+«●» y fecha ISO, y escalonado con movimiento reducido.
+
+Pendiente para el responsable (previo a T001 o fuera de su alcance): LinkedIn/GitHub no aparecen en el menú móvil;
+placeholder del explorador cortado a 390 px; haz del perfil cruzando «Universidad Nacional de Colombia» en móvil;
+subtítulo de la tarjeta de contacto sobre el pelo; pista «Activa una conexión…» oculta con movimiento reducido;
+rótulos decorativos en inglés en ES («FEATURED · RESEARCH PROTOTYPE», «01 / MEET JUAN»); PageUp/PageDown con foco
+en el calendario desplazan la página (comportamiento del componente original). El snapshot de GitHub se refresca a
+mano con `node scripts/fetch-github-activity.mjs`.

@@ -42,14 +42,16 @@ const PLANETS = [
 const PATH_WIDE = [
   { p: 0, pos: [0.4, 0.8, 27], target: [-4.6, 0.3, 0] },
   { p: 0.36, pos: [2.2, 3.6, 15.5], target: [-2.0, 0, 0] },
-  { p: 0.68, pos: [8.4, 6.2, 10.4], target: [-0.6, -0.4, 0] },
-  { p: 1, pos: [1.6, 0.9, 2.4], target: [-1.2, 0, -6] },
+  { p: 0.68, pos: [7.8, 2.6, 12.6], target: [-0.8, -0.2, 0] },
+  { p: 0.86, pos: [5.4, 0.6, 15.2], target: [-1.2, 0, 0] },
+  { p: 1, pos: [1.2, 4.2, 7.5], target: [0, 0, 0] },
 ] as const;
 const PATH_NARROW = [
   { p: 0, pos: [0, -1.2, 30], target: [0, 3.4, 0] },
-  { p: 0.36, pos: [1.2, 1.5, 19], target: [0, 1.6, 0] },
-  { p: 0.68, pos: [6.5, 6.5, 14], target: [0, 0.4, 0] },
-  { p: 1, pos: [1.4, 0.8, 2.6], target: [-1, 0, -6] },
+  { p: 0.36, pos: [1.2, 2.2, 21], target: [0, 0.6, 0] },
+  { p: 0.68, pos: [5.6, 3.2, 18], target: [0, 0.2, 0] },
+  { p: 0.86, pos: [4.2, 1.4, 20], target: [0, 0, 0] },
+  { p: 1, pos: [1.2, 4.2, 7.5], target: [0, 0, 0] },
 ] as const;
 
 const NOISE = /* glsl */ `
@@ -137,16 +139,17 @@ export function createJourney(options: JourneyOptions): JourneyApi | null {
 
   // Star: plasma core, glow and an anamorphic streak.
   const coreMaterial = track(new THREE.ShaderMaterial({
-    uniforms: { uTime: { value: 0 }, uColor: { value: STAR_COLOR } },
+    uniforms: { uTime: { value: 0 }, uColor: { value: STAR_COLOR }, uBoost: { value: 0 } },
     vertexShader: /* glsl */ `varying vec3 vNormal; varying vec3 vPos; varying vec3 vView;
       void main() { vNormal = normalize(normalMatrix * normal); vPos = position; vec4 mv = modelViewMatrix * vec4(position, 1.0); vView = normalize(-mv.xyz); gl_Position = projectionMatrix * mv; }`,
-    fragmentShader: /* glsl */ `uniform float uTime; uniform vec3 uColor; varying vec3 vNormal; varying vec3 vPos; varying vec3 vView;
+    fragmentShader: /* glsl */ `uniform float uTime; uniform vec3 uColor; uniform float uBoost; varying vec3 vNormal; varying vec3 vPos; varying vec3 vView;
       ${NOISE}
       void main() {
         float granules = fbm(vPos * 3.2 + vec3(0.0, uTime * 0.12, uTime * 0.05));
         float limb = pow(max(dot(vNormal, vView), 0.0), 0.45);
-        vec3 c = mix(uColor * 0.85, vec3(1.0), granules * 0.55) * (0.55 + 0.6 * limb);
-        gl_FragColor = vec4(c, 1.0);
+        vec3 c = mix(uColor, vec3(1.0), clamp(granules * 0.6 + limb * 0.45, 0.0, 1.0)) * (0.82 + 0.5 * limb);
+        c += vec3(0.35, 0.75, 1.0) * pow(1.0 - limb, 3.0) * 0.6;
+        gl_FragColor = vec4(mix(c, vec3(1.0), uBoost), 1.0);
       }`,
   }));
   const core = new THREE.Mesh(track(new THREE.SphereGeometry(0.85, 48, 32)), coreMaterial);
@@ -157,10 +160,11 @@ export function createJourney(options: JourneyOptions): JourneyApi | null {
     vertexShader: /* glsl */ `varying vec2 vUv; void main() { vUv = uv; gl_Position = projectionMatrix * (modelViewMatrix * vec4(0.0, 0.0, 0.0, 1.0) + vec4(position.xy, 0.0, 0.0)); }`,
     fragmentShader: shape === "glow"
       ? /* glsl */ `uniform vec3 uColor; uniform float uIntensity; varying vec2 vUv;
-          void main() { float d = length(vUv - 0.5) * 2.0; float g = exp(-d * 4.2) * 0.9 + exp(-d * 14.0) * 1.4; gl_FragColor = vec4(uColor * g * uIntensity, g * uIntensity); }`
+          void main() { float d = length(vUv - 0.5) * 2.0; float g = exp(-d * 3.4) * 0.7 + exp(-d * 11.0) * 1.3; gl_FragColor = vec4(uColor * g * uIntensity, g * uIntensity); }`
       : /* glsl */ `uniform vec3 uColor; uniform float uIntensity; varying vec2 vUv;
           void main() { vec2 q = (vUv - 0.5) * 2.0; float g = exp(-abs(q.y) * 34.0) * exp(-abs(q.x) * 2.6); gl_FragColor = vec4(uColor * g * uIntensity, g * uIntensity); }`,
-    transparent: true, depthWrite: false, blending: THREE.AdditiveBlending,
+    // The shaders output premultiplied colour: plain SRC_ALPHA blending would square the falloff and hide the halo.
+    transparent: true, depthWrite: false, blending: THREE.AdditiveBlending, premultipliedAlpha: true,
   }));
   const glowMaterial = spriteMaterial(new THREE.Color("#8fdcff"), "glow");
   const streakMaterial = spriteMaterial(new THREE.Color("#7fd6ff"), "streak");
@@ -226,7 +230,7 @@ export function createJourney(options: JourneyOptions): JourneyApi | null {
           vec3 base = mix(uA, uB, clamp(bands * 0.75 + swirl * 0.5, 0.0, 1.0));
           float diffuse = smoothstep(-0.18, 0.75, dot(n, l));
           float rim = pow(1.0 - max(dot(n, v), 0.0), 2.6);
-          vec3 color = base * (0.05 + diffuse * 1.15) + uRim * rim * (0.25 + diffuse * 0.9) * (1.0 + uFocus);
+          vec3 color = base * (0.12 + diffuse * 1.1) + uRim * rim * (0.25 + diffuse * 0.9) * (1.0 + uFocus);
           gl_FragColor = vec4(color, 1.0);
         }`,
     }));
@@ -241,7 +245,7 @@ export function createJourney(options: JourneyOptions): JourneyApi | null {
         fragmentShader: /* glsl */ `uniform vec3 uColor; varying vec2 vUv;
           void main() { float r = length(vUv - 0.5) * 2.0; float bands = 0.55 + 0.45 * sin(r * 70.0) * sin(r * 23.0);
             float a = smoothstep(0.58, 0.64, r) * smoothstep(1.0, 0.9, r) * bands * 0.55; gl_FragColor = vec4(uColor * a, a); }`,
-        transparent: true, depthWrite: false, side: THREE.DoubleSide, blending: THREE.AdditiveBlending,
+        transparent: true, depthWrite: false, side: THREE.DoubleSide, blending: THREE.AdditiveBlending, premultipliedAlpha: true,
       }));
       const ring = new THREE.Mesh(track(new THREE.PlaneGeometry(spec.radius * 4.6, spec.radius * 4.6)), ringMaterial);
       ring.rotation.x = -Math.PI / 2 + 0.28;
@@ -275,10 +279,10 @@ export function createJourney(options: JourneyOptions): JourneyApi | null {
   const packetMaterial = track(new THREE.ShaderMaterial({
     uniforms: { uPixel: { value: dpr }, uRun: { value: 0 } },
     vertexShader: /* glsl */ `attribute vec3 color; uniform float uPixel; varying vec3 vColor;
-      void main() { vColor = color; vec4 mv = modelViewMatrix * vec4(position, 1.0); gl_PointSize = uPixel * 26.0 / -mv.z * 3.2; gl_Position = projectionMatrix * mv; }`,
+      void main() { vColor = color; vec4 mv = modelViewMatrix * vec4(position, 1.0); gl_PointSize = uPixel * 26.0 / -mv.z * 4.6; gl_Position = projectionMatrix * mv; }`,
     fragmentShader: /* glsl */ `uniform float uRun; varying vec3 vColor;
       void main() { float d = length(gl_PointCoord - 0.5) * 2.0; float g = exp(-d * 5.0) + exp(-d * 18.0); gl_FragColor = vec4(mix(vColor, vec3(1.0), 0.5) * g * uRun, g * uRun); }`,
-    transparent: true, depthWrite: false, blending: THREE.AdditiveBlending,
+    transparent: true, depthWrite: false, blending: THREE.AdditiveBlending, premultipliedAlpha: true,
   }));
   const packets = new THREE.Points(packetGeometry, packetMaterial);
   packets.frustumCulled = false;
@@ -353,6 +357,20 @@ export function createJourney(options: JourneyOptions): JourneyApi | null {
     return 1;
   };
 
+  const corePos = new THREE.Vector3();
+  const coreScreen = new THREE.Vector2();
+  let starRadius = 0; // the star's radius on screen, in pixels
+  // A planet passing behind the star hides its label instead of printing it over the light.
+  const behindStar = (object: THREE.Object3D) => {
+    object.getWorldPosition(worldPos);
+    const distance = worldPos.distanceTo(camera.position);
+    const coreDistance = corePos.distanceTo(camera.position);
+    if (distance <= coreDistance) return 0;
+    projected.copy(worldPos).project(camera);
+    const pixels = Math.hypot((projected.x - coreScreen.x) * width / 2, (projected.y - coreScreen.y) * height / 2);
+    return 1 - smooth(starRadius * 1.1, starRadius * 1.8, pixels);
+  };
+
   const placeLabel = (element: HTMLElement | null, object: THREE.Object3D, visibility: number, lift: number) => {
     if (!element) return;
     object.getWorldPosition(worldPos);
@@ -361,8 +379,10 @@ export function createJourney(options: JourneyOptions): JourneyApi | null {
     const behind = projected.z > 1;
     const x = (projected.x * 0.5 + 0.5) * width;
     const y = (-projected.y * 0.5 + 0.5) * height;
+    // Nor is any planet label printed over the star's disc.
+    const overStar = object === core ? 1 : smooth(starRadius * 0.9, starRadius * 1.5, Math.hypot((projected.x - coreScreen.x) * width / 2, (projected.y - coreScreen.y) * height / 2));
     element.style.transform = `translate3d(${x.toFixed(1)}px, ${y.toFixed(1)}px, 0)`;
-    element.style.opacity = behind ? "0" : visibility.toFixed(3);
+    element.style.opacity = behind ? "0" : (visibility * overStar).toFixed(3);
   };
 
   const draw = (delta: number) => {
@@ -391,11 +411,28 @@ export function createJourney(options: JourneyOptions): JourneyApi | null {
     }
     camera.position.copy(camPos);
     camera.lookAt(camTarget);
+    // On wide screens the text owns the left column: slide the image right as the system grows, back at the dive.
+    // On phones the text sits at the bottom instead: lift the system into the upper half.
+    const shift = 0.1 * smooth(0.22, 0.44, p);
+    // Reduced motion: on wide screens the system sits right of the headline, above its panel; on phones the stage
+    // flows and the system fills the gap between the headline and the panel.
+    if (narrow && reduced) camera.setViewOffset(width, height, 0, -height * 0.06, width, height);
+    else if (narrow) camera.setViewOffset(width, height, 0, height * shift * (1 - exit), width, height);
+    else if (reduced) camera.setViewOffset(width, height, -width * 0.2, height * 0.07, width, height);
+    else camera.setViewOffset(width, height, -width * shift * (1 - exit), 0, width, height);
+    // Labels project before render(): bring the view matrix up to date for this frame.
+    camera.updateMatrixWorld();
 
     // Star and its light.
     core.getWorldPosition(lightPosition);
+    corePos.copy(lightPosition);
+    projected.copy(corePos).project(camera);
+    coreScreen.set(projected.x, projected.y);
+    starRadius = 0.85 / corePos.distanceTo(camera.position) / Math.tan(THREE.MathUtils.degToRad(camera.fov / 2)) * height / 2;
     coreMaterial.uniforms.uTime.value = time;
-    glowMaterial.uniforms.uIntensity.value = 1.15 - form * 0.25 + exit * 1.6;
+    glowMaterial.uniforms.uIntensity.value = 1.15 - form * 0.25 + exit * 2.4;
+    glow.scale.setScalar(1 + exit * exit * 5);
+    coreMaterial.uniforms.uBoost.value = exit * 0.4;
     streakMaterial.uniforms.uIntensity.value = (1 - form * 0.55) * 0.9 + exit * 1.2;
     starMaterial.uniforms.uTime.value = time;
     starMaterial.uniforms.uFade.value = 1 - exit * 0.6;
@@ -413,7 +450,7 @@ export function createJourney(options: JourneyOptions): JourneyApi | null {
       planet.material.uniforms.uTime.value = time;
       planet.material.uniforms.uFocus.value = selected;
       (planet.orbitLine.material as THREE.LineBasicMaterial).opacity = form * (0.16 + run * 0.16 + selected * 0.4) * (1 - exit);
-      placeLabel(labels[index], planet.group, form * (1 - exit) * smooth(0.18, 0.4, p), planet.radius + 0.55);
+      placeLabel(labels[index], planet.group, form * (1 - exit) * smooth(0.18, 0.4, p) * (1 - behindStar(planet.group)), planet.radius + 0.55);
     });
     placeLabel(coreLabel, core, smooth(0.3, 0.45, p) * (1 - exit), -1.6);
 

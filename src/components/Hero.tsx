@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState, useSyncExternalStore } from "react";
-import { motion, useInView, useMotionValueEvent, useReducedMotion, useScroll, useTransform } from "motion/react";
+import { motion, useInView, useMotionValue, useMotionValueEvent, useReducedMotion, useScroll, useTransform } from "motion/react";
 import { ArrowDown, ArrowUpRight, Pause, Play } from "@phosphor-icons/react";
 import { useLang } from "@/components/providers/LanguageProvider";
 import { scrollToId } from "@/lib/utils";
@@ -49,22 +49,30 @@ export default function Hero() {
   const [act, setAct] = useState(0);
 
   const { scrollYProgress } = useScroll({ target: section, offset: ["start start", "end end"] });
-  const introOpacity = useTransform(scrollYProgress, [0, 0.16, 0.27], [1, 1, 0]);
-  const introY = useTransform(scrollYProgress, [0, 0.27], [0, -70]);
-  const systemOpacity = useTransform(scrollYProgress, [0.3, 0.38, 0.58, 0.65], [0, 1, 1, 0]);
-  const systemY = useTransform(scrollYProgress, [0.3, 0.65], [36, -36]);
-  const runOpacity = useTransform(scrollYProgress, [0.66, 0.73, 0.9, 0.97], [0, 1, 1, 0]);
-  const runY = useTransform(scrollYProgress, [0.66, 0.97], [36, -24]);
-  const nebulaScale = useTransform(scrollYProgress, [0, 1], [1, 1.32]);
-  const nebulaOpacity = useTransform(scrollYProgress, [0, 0.7, 1], [0.62, 0.5, 0.12]);
-  const exitOpacity = useTransform(scrollYProgress, [0.9, 1], [0, 1]);
-  const railFill = useTransform(scrollYProgress, [0, 0.95], [0, 1]);
+  // Motion would hand transforms of scrollYProgress to a native ViewTimeline whose range ignores the offset above
+  // (the intro stayed visible mid-journey); a plain mirror keeps every transform on the JS path, in sync with the scene.
+  const progress = useMotionValue(0);
+  const introOpacity = useTransform(progress, [0.16, 0.27], [1, 0]);
+  const bottomOpacity = useTransform(progress, [0.12, 0.22], [1, 0]);
+  const introY = useTransform(progress, [0, 0.27], [0, -40]);
+  const systemOpacity = useTransform(progress, [0.3, 0.38, 0.58, 0.65], [0, 1, 1, 0]);
+  const systemY = useTransform(progress, [0.3, 0.65], [36, -36]);
+  const runOpacity = useTransform(progress, [0.66, 0.73, 0.9, 0.97], [0, 1, 1, 0]);
+  const runY = useTransform(progress, [0.66, 0.97], [36, -24]);
+  const nebulaScale = useTransform(progress, [0, 1], [1, 1.32]);
+  const nebulaOpacity = useTransform(progress, [0, 0.7, 1], [0.62, 0.5, 0.12]);
+  const exitOpacity = useTransform(progress, [0.88, 0.98], [0, 1]);
+  const railFill = useTransform(progress, [0, 0.95], [0, 1]);
 
   useMotionValueEvent(scrollYProgress, "change", value => {
-    api.current?.setProgress(value);
+    progress.set(value);
+    // With reduced motion the stage is not pinned (progress jumps to 1): the scene keeps its fixed frame.
+    if (!reduce) api.current?.setProgress(value);
     const next = value < 0.29 ? 0 : value < 0.655 ? 1 : 2;
     setAct(current => (current === next ? current : next));
   });
+
+  useEffect(() => { progress.set(scrollYProgress.get()); }, [progress, scrollYProgress]);
 
   useEffect(() => {
     const sync = () => setTabVisible(!document.hidden);
@@ -157,7 +165,7 @@ export default function Hero() {
         {(!hydrated || !reduce) && <button type="button" onClick={() => setPaused(value => !value)} aria-label={motionLabel} aria-pressed={paused}>{paused ? <Play size={13} aria-hidden /> : <Pause size={13} aria-hidden />}{copy.motion}</button>}
       </div>
 
-      <motion.div className="signal-bottom journey-bottom" style={reduce ? undefined : { opacity: introOpacity }}>
+      <motion.div className="signal-bottom journey-bottom" style={reduce ? undefined : { opacity: bottomOpacity }}>
         <span><i />{ui.current}</span><span className="signal-location">{ui.place}</span>
         <a href="#perfil" onClick={e => { e.preventDefault(); scrollToId("#perfil"); }}>{ui.scroll}<ArrowDown size={14} aria-hidden /></a>
       </motion.div>

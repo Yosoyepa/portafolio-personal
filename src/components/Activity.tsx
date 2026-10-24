@@ -36,11 +36,13 @@ const LABELS = {
   },
 };
 
-/** Spanish words for the heatmap; English keeps the component's own defaults. */
+/** Spanish words for the heatmap. English keeps the component's own defaults except the legend: on this dark theme
+ *  busier days are brighter, not darker. */
 const ES_STRINGS: Partial<ActivityHeatmapStrings> = {
   in: "en", none: "Sin", to: "a", orMore: "o más", day: "día", days: "días", with: "con", less: "Menos", more: "Más",
   highlightGroup: "Resaltar días por nivel", highlightDays: "Resaltar días con", legend: "Los cuadros más intensos indican más", levels: "Niveles",
 };
+const EN_STRINGS: Partial<ActivityHeatmapStrings> = { legend: "Brighter squares mean more" };
 
 const TYPE_MS = 18, ERASE_MS = 9;
 /** The range sweep recolors the grid for about 740 ms; the commit pulse waits for it. */
@@ -338,7 +340,7 @@ function ActivityPanel({ lang }: { lang: "es" | "en" }) {
           locale={ui.locale}
           weekStartsOn={0}
           thresholds={stats.thresholds}
-          strings={lang === "es" ? ES_STRINGS : undefined}
+          strings={lang === "es" ? ES_STRINGS : EN_STRINGS}
           selectedDate={selected}
           onSelectDate={setSelected}
           actions={

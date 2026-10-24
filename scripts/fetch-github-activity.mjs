@@ -42,8 +42,9 @@ function compact(id, calendar) {
   return { id, start: days[0].date, end, total, counts };
 }
 
-/** Bytes per language across public, owned, non-fork repositories; top six plus "Other", shares rounded to four
- *  decimals with largest remainders so they add up to exactly 1. */
+/** Language mix across public, owned, non-fork repositories. Each repository weighs the same: its bytes become shares
+ *  of 1 before adding up, so one repository with committed dependencies cannot flatten the rest. Top six plus "Other",
+ *  shares rounded to four decimals with largest remainders so they add up to exactly 1. */
 async function languages() {
   const bytes = new Map();
   let cursor = null, repos = 0;
@@ -55,12 +56,15 @@ async function languages() {
       } } }`, { login: LOGIN, cursor });
     const page = data.user.repositories;
     repos = page.totalCount;
-    for (const repo of page.nodes)
+    for (const repo of page.nodes) {
+      const repoBytes = repo.languages.edges.reduce((sum, { size }) => sum + size, 0);
+      if (!repoBytes) continue;
       for (const { size, node } of repo.languages.edges) {
         const entry = bytes.get(node.name) ?? { name: node.name, color: node.color ?? OTHER.color, size: 0 };
-        entry.size += size;
+        entry.size += size / repoBytes;
         bytes.set(node.name, entry);
       }
+    }
     cursor = page.pageInfo.hasNextPage ? page.pageInfo.endCursor : null;
   } while (cursor);
 

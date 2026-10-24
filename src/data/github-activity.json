@@ -1,6 +1,6 @@
 {
   "login": "Yosoyepa",
-  "generatedAt": "2026-10-24T06:53:20.475Z",
+  "generatedAt": "2026-10-24T07:01:44.460Z",
   "ranges": [
     {
       "id": "last-year",
@@ -63,37 +63,37 @@
     {
       "name": "Python",
       "color": "#3572A5",
-      "share": 0.7759
+      "share": 0.5208
     },
     {
       "name": "TypeScript",
       "color": "#3178c6",
-      "share": 0.0773
-    },
-    {
-      "name": "Rust",
-      "color": "#dea584",
-      "share": 0.0696
+      "share": 0.1857
     },
     {
       "name": "JavaScript",
       "color": "#f1e05a",
-      "share": 0.031
+      "share": 0.0769
     },
     {
       "name": "Dart",
       "color": "#00B4AB",
-      "share": 0.0117
+      "share": 0.0668
+    },
+    {
+      "name": "Java",
+      "color": "#b07219",
+      "share": 0.0385
     },
     {
       "name": "CSS",
       "color": "#663399",
-      "share": 0.011
+      "share": 0.0332
     },
     {
       "name": "Other",
       "color": "#5d6680",
-      "share": 0.0235
+      "share": 0.0781
     }
   ],
   "publicRepos": 29

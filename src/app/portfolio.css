@@ -154,6 +154,18 @@ button, summary { cursor: pointer; }
 .case-details summary { min-height: 52px; font-size: 12px; }
 .case-details ul { font-size: 13px; padding-bottom: 20px; }
 .case-source { display: flex; gap: 9px; align-items: center; color: #c1d3df; min-height: 56px; font-size: 12px; border-top: 1px solid #ffffff0f; }.case-source > svg:last-child { margin-left: auto; transition: transform .2s; }.case-source:hover { color: var(--case-accent); }.case-source:hover > svg:last-child { transform: translate(2px, -2px); }
+/* Proyecto destacado: ocupa la fila completa; en escritorio, diagrama y texto lado a lado. */
+.case-card--featured { grid-column: 1 / -1; }
+@media (min-width: 1024px) {
+  .case-card--featured { display: grid; grid-template-columns: minmax(0, 1.05fr) minmax(0, 1fr); }
+  .case-card--featured .case-art { height: auto; min-height: 380px; border-bottom: 0; border-right: 1px solid #ffffff11; }
+  .case-card--featured .case-flow { inset: 44% 13% auto; }
+  .case-card--featured .case-flow-node { width: 64px; height: 64px; border-radius: 16px; }
+  .case-card--featured .case-flow-lines { left: 32px; width: calc(100% - 64px); height: 64px; }
+  .case-card--featured .case-copy { padding: 34px 40px 10px; }
+  .case-card--featured .case-copy h3 { font-size: 36px; }
+  .case-card--featured .case-headline { font-size: 17px; }
+}
 .case-archive { margin-top: 32px; display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 15px; padding: 24px 0; border-block: 1px solid #ffffff13; color: #9daec1; font-size: 12px; }.case-archive a { display: flex; align-items: center; gap: 13px; color: #bddbd8; min-height: 44px; }
 
 /* A true two-sided contact card; the inactive face is inert in the DOM. */

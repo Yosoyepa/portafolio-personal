@@ -65,7 +65,7 @@ const es = {
       degree: "Ingeniería de Sistemas y Computación",
       school: "Universidad Nacional de Colombia",
       period: "2021 – 2027",
-      note: "En curso, etapas finales",
+      note: "En curso · grado previsto en 2027",
     },
   },
   experience: {
@@ -120,6 +120,8 @@ const es = {
       {
         name: "Académicas & Vendor",
         items: [
+          { name: "Diplomado en Machine Learning y Data Science", issuer: "Universidad Nacional de Colombia", date: "En curso · 2026" },
+          { name: "Desarrollo Seguro (CC) COL", issuer: "Net4skills · NETEC", date: "Jul 2026" },
           { name: "Diplomado en Arquitectura y Calidad de Software", issuer: "Universidad Nacional de Colombia", date: "Jun 2026" },
           { name: "Claude with Amazon Bedrock", issuer: "Anthropic", date: "Mar 2026" },
           { name: "Applied Data Science with Python - Level 2", issuer: "IBM", date: "Nov 2025" },
@@ -193,7 +195,7 @@ const en: typeof es = {
       degree: "Systems and Computing Engineering",
       school: "Universidad Nacional de Colombia",
       period: "2021 – 2027",
-      note: "In progress, final stages",
+      note: "In progress · expected to graduate in 2027",
     },
   },
   experience: {
@@ -248,6 +250,8 @@ const en: typeof es = {
       {
         name: "Academic & Vendor",
         items: [
+          { name: "Machine Learning & Data Science Diploma", issuer: "Universidad Nacional de Colombia", date: "In progress · 2026" },
+          { name: "Secure Development (CC) COL", issuer: "Net4skills · NETEC", date: "Jul 2026" },
           { name: "Software Architecture & Quality Diploma", issuer: "Universidad Nacional de Colombia", date: "Jun 2026" },
           { name: "Claude with Amazon Bedrock", issuer: "Anthropic", date: "Mar 2026" },
           { name: "Applied Data Science with Python - Level 2", issuer: "IBM", date: "Nov 2025" },

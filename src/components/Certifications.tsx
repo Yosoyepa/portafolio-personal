@@ -9,8 +9,8 @@ import AccordionGallery from "@/components/reactbits/AccordionGallery";
 import { useLang } from "@/components/providers/LanguageProvider";
 
 const BADGES = ["/certs/aws-data-engineer.png", "/certs/aws-ai-practitioner.png", "/certs/aws-cloud-practitioner.png"];
-const MONOGRAMS = [["DE", "AI", "CP", "EA"], ["AI", "ML", "λ", "IR"], ["UN", "A", "IBM", "DS4A"]];
-const ACCENTS = ["#ac8cff", "#63dce5", "#f3be85", "#94baff"];
+const MONOGRAMS = [["DE", "AI", "CP", "EA"], ["AI", "ML", "λ", "IR"], ["ML", "SD", "UN", "A", "IBM", "DS4A"]];
+const ACCENTS = ["#ac8cff", "#63dce5", "#f3be85", "#94baff", "#9be3d4", "#b9b3f2"];
 const LABELS = {
   es: {
     categories: ["AWS Certified", "AWS Demonstrated", "Formación & partners"],
@@ -18,7 +18,7 @@ const LABELS = {
     hint: "Selecciona una credencial para explorarla",
     keyboard: "Navega también con las flechas del teclado",
     count: "credenciales",
-    short: [["Data Engineer", "AI Practitioner", "Cloud Practitioner", "Early Adopter"], ["Agentic AI", "MLOps", "Serverless", "Incident Response"], ["Arquitectura", "Claude + Bedrock", "Data Science", "DS4A"]],
+    short: [["Data Engineer", "AI Practitioner", "Cloud Practitioner", "Early Adopter"], ["Agentic AI", "MLOps", "Serverless", "Incident Response"], ["Machine Learning", "Desarrollo seguro", "Arquitectura", "Claude + Bedrock", "Data Science", "DS4A"]],
   },
   en: {
     categories: ["AWS Certified", "AWS Demonstrated", "Education & partners"],
@@ -26,7 +26,7 @@ const LABELS = {
     hint: "Select a credential to explore it",
     keyboard: "You can also navigate with the arrow keys",
     count: "credentials",
-    short: [["Data Engineer", "AI Practitioner", "Cloud Practitioner", "Early Adopter"], ["Agentic AI", "MLOps", "Serverless", "Incident Response"], ["Architecture", "Claude + Bedrock", "Data Science", "DS4A"]],
+    short: [["Data Engineer", "AI Practitioner", "Cloud Practitioner", "Early Adopter"], ["Agentic AI", "MLOps", "Serverless", "Incident Response"], ["Machine Learning", "Secure development", "Architecture", "Claude + Bedrock", "Data Science", "DS4A"]],
   },
 };
 

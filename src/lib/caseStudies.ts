@@ -1,9 +1,26 @@
-/** Public repository evidence, reviewed 2026-09-07. See docs/portfolio-evidence.md. */
+/** Public repository evidence, reviewed 2026-09-07 (Ommatix: 2026-10-24). See docs/portfolio-evidence.md. */
 export type ProjectCategory = "agents" | "cloud" | "tooling";
 type Story = { name: string; headline: string; description: string; status: string; proof: string; details: string[]; award: string | null };
-type CaseStudy = { id: string; year: string; category: ProjectCategory; tech: string[]; link: string; flow: string[]; es: Story; en: Story };
+type CaseStudy = { id: string; year: string; category: ProjectCategory; tech: string[]; link: string; flow: string[]; featured?: boolean; es: Story; en: Story };
 
 const cases: CaseStudy[] = [
+  {
+    id: "ommatix", year: "2026", category: "agents", featured: true,
+    tech: ["Rust", "MCP", "ONNX Runtime", "UI Automation", "DXGI"],
+    link: "https://github.com/Yosoyepa/Ommatix", flow: ["OBSERVE", "IDENTITY", "ACT"],
+    es: {
+      name: "Ommatix", headline: "Que un agente actúe sobre el control correcto, no sobre una coordenada.",
+      description: "El prototipo de investigación de mi tesis: un motor local en Rust que da a los agentes de escritorio identificadores y revisiones de cada elemento, en lugar de coordenadas, y que rechaza cualquier acción sobre una observación obsoleta.",
+      status: "Open source · Prototipo de investigación", proof: "Actuación fail-closed: simulación por defecto", award: null,
+      details: ["Percepción incremental: analiza solo las regiones que cambian frente al último fotograma confirmado y recurre a un refresco completo cuando la geometría o el presupuesto lo exigen.", "Contrato MCP con tres herramientas (observe_screen, execute_action y get_engine_metrics); la geometría no sale del motor y cada acción exige una observación vigente.", "Evaluación preliminar con tres modelos por MCP: 0 falsos éxitos y 0 eventos de seguridad en la fase en vivo. Es una serie por modelo sobre apps sintéticas, no un ranking de modelos."],
+    },
+    en: {
+      name: "Ommatix", headline: "An agent should act on the right control, not on a coordinate.",
+      description: "The research prototype behind my thesis: a local Rust engine that gives desktop agents element IDs and revisions instead of coordinates, and refuses any action based on a stale observation.",
+      status: "Open source · Research prototype", proof: "Fail-closed actuation: dry run by default", award: null,
+      details: ["Incremental perception: it analyses only the regions that changed against the last committed frame and falls back to a full refresh when geometry or budgets require it.", "MCP contract with three tools (observe_screen, execute_action and get_engine_metrics); geometry stays inside the engine and every action needs a current observation.", "Preliminary evaluation with three models over MCP: 0 false successes and 0 safety events in the live phase. One series per model on synthetic apps, not a model ranking."],
+    },
+  },
   {
     id: "wct", year: "2026", category: "tooling",
     tech: ["Python", "pytest", "Mutation testing", "Ruff", "GitHub Actions"],

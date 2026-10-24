@@ -35,8 +35,17 @@
 /* The heatmap tags its own wave with data-reveal, the attribute the site uses for scroll reveals. The grid itself stays
    visible, so only the component's wave brings it in. */
 .anim-ready .gh-activity [role="grid"][data-reveal] { opacity: 1; }
+/* The heatmap's entry wave, one cell at a time: while the grid stays "hidden", a cell the script marks data-in takes the
+   revealing state with no delay of its own, since the script already waited for its diagonal. "now" lands off screen. */
+.gh-activity [role="grid"][data-reveal="hidden"] [role="row"] > [data-in] { opacity: 1; transform: none; transition: background-color .32s var(--ease-standard), transform var(--duration-spring) var(--ease-spring), opacity .36s var(--ease-enter); }
+.gh-activity [role="grid"][data-reveal="hidden"] [role="row"] > [data-in][data-empty] { transform: scale(0); }
+.gh-activity [role="grid"][data-reveal="hidden"] [role="row"] > [data-in="now"] { transition: none; }
 
 .gh-activity .gh-card { background: var(--gh-panel); border-radius: 18px; }
+/* BorderGlow writes the pointer into custom properties on the card at every move, and a custom property change restyles
+   every descendant: 371 cells per pointer move. Only the card's edge and wash read them, so the content resets them and
+   the recalc stops at its first level. */
+.gh-activity .gh-card > :not(.border-glow-edge) { --cursor-angle: initial; --edge-opacity: initial; --pointer-x: initial; --pointer-y: initial; }
 /* The data panel keeps the edge light but not the cursor wash: the sticky weekday column must match the panel exactly. */
 .gh-activity .gh-panel::before { display: none; }
 
@@ -51,6 +60,8 @@
 .gh-command { display: flex; flex: 1; min-width: 0; align-items: baseline; gap: 9px; font: 11.5px/1.6 var(--font-mono); color: var(--foreground); overflow-wrap: anywhere; }
 .gh-command-text { position: relative; display: block; min-width: 0; }
 .gh-command-ghost { visibility: hidden; }
+/* The hidden copy's caret holds the width only; blinking it restyled and repainted it every frame for nothing. */
+.gh-command-ghost .gh-caret { animation: none; }
 /* The ghost copy fixes the size; the typed layer is its own layout root, so each keystroke stays inside it. */
 .gh-command-typed { position: absolute; inset: 0; contain: strict; }
 .gh-word { white-space: nowrap; }
@@ -73,8 +84,11 @@
 
 /* Commit activation: level-four days glow, in step with the sweep that recolors them, and the latest active day beats. */
 .gh-activity [role="gridcell"] { position: relative; }
-.gh-activity [role="gridcell"]::after { content: ""; position: absolute; inset: 0; border-radius: inherit; pointer-events: none; box-shadow: 0 0 8px #63dce570, 0 0 2px #adf3ed66; opacity: 0; transition: opacity .32s var(--ease-standard) var(--delay); }
-.gh-activity [role="gridcell"][data-level="4"]::after { opacity: 1; }
+/* Only the lit days carry the glow until a new range first sweeps in: every glow restyles along with its cell on each frame
+   of the entry wave. From the first sweep on all days keep one, so a glow also fades out in step with its cell. */
+.gh-activity [role="gridcell"][data-level="4"]::after, .gh-activity [role="grid"][data-swept] [role="gridcell"]::after { content: ""; position: absolute; inset: 0; border-radius: inherit; pointer-events: none; box-shadow: 0 0 8px #63dce570, 0 0 2px #adf3ed66; opacity: 0; transition: opacity .32s var(--ease-standard) var(--delay); }
+.gh-activity [role="grid"] [role="gridcell"][data-level="4"]::after { opacity: 1; }
+@starting-style { .gh-activity [role="grid"] [role="gridcell"][data-level="4"]::after { opacity: 0; } }
 .gh-activity [role="gridcell"][data-pulse] { z-index: 1; }
 .gh-activity [role="gridcell"][data-pulse]::before { content: ""; position: absolute; inset: 0; border-radius: inherit; pointer-events: none; animation: gh-commit-pulse 900ms var(--ease-enter) 3 both; }
 @keyframes gh-commit-pulse { from { box-shadow: 0 0 0 0 #63dce5d9; } to { box-shadow: 0 0 0 7px #63dce500; } }

@@ -123,6 +123,8 @@ const standard = [...motionTokens.ease.standard] as [
 ];
 /** Total wave travel in ms, kept under the system's stagger budget however many weeks the range spans. */
 const WAVE = 420;
+/** Zero delays for cells that carry none of their own, which keeps their transitions valid. */
+const GRID_WAVE = { "--wave": "0ms", "--wave-back": "0ms" } as CSSProperties;
 const toUtc = (iso: string) => Date.parse(`${iso}T00:00:00Z`);
 const toIso = (time: number) => new Date(time).toISOString().slice(0, 10);
 
@@ -468,6 +470,7 @@ export function ActivityHeatmap({
       direction: model.start > range.start ? 1 : -1,
     });
 
+  const initialStart = useRef(model.start);
   const [reveal, setReveal] = useState<"hidden" | "revealing" | "done">(
     "hidden",
   );
@@ -483,6 +486,44 @@ export function ActivityHeatmap({
     const timer = window.setTimeout(() => setReveal("done"), WAVE + 700);
     return () => window.clearTimeout(timer);
   }, [reveal]);
+  // The wave itself: each cell joins when its diagonal comes up, so a frame starts a handful of transitions instead of all
+  // of them. Cells scrolled out of the narrow viewport's strip join without a transition, nobody sees them land.
+  useEffect(() => {
+    const grid = gridRef.current,
+      scroller = scrollerRef.current;
+    if (reveal !== "revealing" || !grid) return;
+    const view = scroller?.getBoundingClientRect();
+    const rows = [...grid.children] as HTMLElement[];
+    const columns = [...(rows[0]?.children ?? [])].map((cell) => {
+      const box = cell.getBoundingClientRect();
+      return !view || (box.right > view.left - box.width && box.left < view.right + box.width);
+    });
+    const step = Math.min(12, WAVE / Math.max(1, model.weeks - 1 + 6));
+    const queue = rows
+      .flatMap((row, r) =>
+        ([...row.children] as HTMLElement[]).map((cell, c) => ({
+          cell,
+          at: (c + r) * step,
+          shown: columns[c],
+        })),
+      )
+      .sort((x, y) => x.at - y.at);
+    const began = performance.now();
+    let next = 0,
+      frame = 0;
+    const tick = (now: number) => {
+      // Half a frame early, so a cell lands as close as the frame allows to its own delay. A slow frame takes a few
+      // diagonals at most, and the wave slows down with it instead of starting a whole block of cells at once.
+      const last = Math.min(queue.length, next + 36);
+      while (next < last && queue[next].at <= now - began + 8) {
+        const { cell, shown } = queue[next++];
+        cell.setAttribute("data-in", shown ? "" : "now");
+      }
+      if (next < queue.length) frame = requestAnimationFrame(tick);
+    };
+    frame = requestAnimationFrame(tick);
+    return () => cancelAnimationFrame(frame);
+  }, [reveal, model.weeks]);
 
   const selectedIndex = selectedDate
     ? Math.round((toUtc(selectedDate) - model.start) / DAY)
@@ -502,6 +543,15 @@ export function ActivityHeatmap({
   const [legendFocus, setLegendFocus] = useState(0);
   const previewTimer = useRef(0);
   const highlight = preview ?? pinned;
+  // The entry wave runs from script, one diagonal of cells at a time (the effect above), while the grid stays "hidden":
+  // flipping the grid's attribute restyles every cell and starts all of their transitions in one frame. The attribute
+  // catches up once the settled timing matters, that is when the legend highlights a level or a new range sweeps in.
+  // Each cell carries its own sweep delay only from the first new range on; until then the grid's zero delay serves.
+  const [swept, setSwept] = useState(false);
+  if (!swept && model.start !== initialStart.current) setSwept(true);
+  const [settled, setSettled] = useState(false);
+  if (!settled && (swept || highlight !== null)) setSettled(true);
+  const revealAttr = reduced || settled ? reveal : "hidden";
   const previewLevel = (level: number | null) => {
     window.clearTimeout(previewTimer.current);
     if (level !== null) setPreview(level);
@@ -570,6 +620,17 @@ export function ActivityHeatmap({
     hideTimer.current = window.setTimeout(() => setOpen(false), delay);
   }
   useEffect(() => () => window.clearTimeout(hideTimer.current), []);
+
+  // Each wave or sweep runs hundreds of cell transitions, and React's root listeners walk the tree for every one of their
+  // events. Nothing here listens to them, so they stop before reaching the root.
+  useEffect(() => {
+    const stop = (event: Event) => {
+      if (gridRef.current?.contains(event.target as Node)) event.stopPropagation();
+    };
+    const types = ["transitionrun", "transitionstart", "transitionend", "transitioncancel"];
+    types.forEach((type) => window.addEventListener(type, stop, true));
+    return () => types.forEach((type) => window.removeEventListener(type, stop, true));
+  }, []);
 
   useLayoutEffect(() => {
     const root = rootRef.current,
@@ -712,7 +773,7 @@ export function ActivityHeatmap({
                   key={col}
                   className={styles.cell}
                   data-empty=""
-                  style={wave}
+                  style={swept ? wave : undefined}
                   aria-hidden="true"
                 />
               );
@@ -723,7 +784,7 @@ export function ActivityHeatmap({
                 key={col}
                 role="gridcell"
                 className={styles.cell}
-                style={wave}
+                style={swept ? wave : undefined}
                 data-index={index}
                 data-level={model.levels[index]}
                 tabIndex={index === tabIndexDay ? 0 : -1}
@@ -741,6 +802,7 @@ export function ActivityHeatmap({
       model,
       step,
       maxDiagonal,
+      swept,
       tabIndexDay,
       selectedIndex,
       formats,
@@ -825,7 +887,10 @@ export function ActivityHeatmap({
               aria-readonly="true"
               aria-describedby={`${id}-legend`}
               className={styles.grid}
-              data-reveal={reveal}
+              style={GRID_WAVE}
+              data-reveal={revealAttr}
+              data-landed={reveal === "done" || undefined}
+              data-swept={swept || undefined}
               data-direction={range.direction < 0 ? "back" : undefined}
               data-highlight={highlight ?? undefined}
               onPointerOver={onGridPointerOver}

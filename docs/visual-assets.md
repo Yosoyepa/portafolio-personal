@@ -29,3 +29,61 @@ El shader corresponde al componente React Bits Scanner adjuntado por el usuario.
 - Los filamentos eléctricos son trayectorias SVG fijas con pequeños segmentos luminosos que se desplazan; no se recalcula geometría en cada fotograma ni se añaden destellos estroboscópicos.
 
 LaserFlow y `ProfileLaser.tsx` no se modifican en esta iteración.
+
+# Logos de tecnologías
+
+Iteración del 24 de octubre de 2026 (T001 · I5). El Marquee y los chips de Stack, Proyectos y Experiencia muestran el logo de la tecnología antes de la etiqueta: `src/components/BrandIcon.tsx` lo pinta y `src/lib/brandIcons.ts` resuelve cada etiqueta del sitio (las compuestas usan el primer segmento con logo: «S3 / EFS» → S3, «Keycloak / Cognito» → Keycloak). Los logos son decorativos (`aria-hidden`): la etiqueta de texto ya nombra la tecnología.
+
+## Marcas: Simple Icons
+
+- Paquete npm `simple-icons` **16.35.0** (versión exacta en `package.json`). Los datos del proyecto se publican bajo CC0 1.0, pero su `DISCLAIMER.md` aclara que no todos los iconos son CC0 y que cada marca pertenece a su dueño y tiene sus propias guías.
+- Solo se importan los 23 iconos usados, como named exports (`siPython`, …): en producción el resto del paquete queda fuera (un chunk de 14,5 KB gzip con esos 23 iconos).
+- SVG inline de 24 × 24 con el color oficial (`hex`). Las marcas casi negras (luminancia relativa < 0,08) se pintan `#e6edf3` para el fondo oscuro: OpenJDK, Model Context Protocol, OpenTelemetry, Rust y Keycloak.
+- «Java» usa el icono de OpenJDK, la implementación de referencia de Java SE: Simple Icons no incluye el logo de Java.
+
+Licencias y guías declaradas por el paquete para los iconos usados:
+
+| Icono (slug) | Licencia declarada | Guías de marca |
+| --- | --- | --- |
+| `apacheairflow` | Apache-2.0 | apache.org/foundation/marks |
+| `keycloak` | Personalizada (uso de marcas de la Linux Foundation) | linuxfoundation.org/legal/trademark-usage |
+| `openjdk` | BSD-3-Clause | — |
+| `opentelemetry` | CC BY 4.0 | cncf-branding.netlify.app/projects/opentelemetry |
+| `rust` | CC BY-SA 4.0 | rust-lang.org/policies/media-guide |
+| `opensearch`, `postgresql`, `python`, `streamlit`, `typescript`, `whatsapp` | Sin dato | Enlace en el campo `guidelines` de cada icono |
+| `docker`, `fastapi`, `githubactions`, `googlegemini`, `langchain`, `modelcontextprotocol`, `onnx`, `pydantic`, `pytest`, `ruff`, `springboot`, `telegram` | Sin dato | Sin dato |
+
+Atribución: logo de OpenTelemetry (CNCF), CC BY 4.0; logo de Rust (Rust Foundation), CC BY-SA 4.0. Ambos proceden de Simple Icons y se muestran recoloreados a `#e6edf3`.
+
+## Servicios AWS: AWS Architecture Icons
+
+- Paquete oficial descargado de https://aws.amazon.com/architecture/icons/: `Icon-package_07312026` (publicación del 31 de julio de 2026, la vigente el 24 de octubre de 2026).
+- Iconos de servicio de 16 px (`Architecture-Service-Icons_07312026/<categoría>/16/Arch_<servicio>_16.svg`: viewBox 24 × 24, cuadrado del color de la categoría y glifo blanco). Para la etiqueta «AWS», el logo de grupo `Architecture-Group-Icons_07312026/AWS-Cloud-logo_32.svg`.
+- Copiados a `public/brand/aws/<slug>.svg` y optimizados: sin declaración XML, `<title>`, `id`, `version` ni `xmlns:xlink`, y sin `width`/`height` en la raíz; coordenadas redondeadas a 3 decimales. La geometría y los colores no cambian. 17 archivos, 34 843 bytes en total.
+
+| Archivo | Icono original |
+| --- | --- |
+| `aws.svg` | AWS-Cloud-logo_32 |
+| `bedrock.svg` | Arch_Amazon-Bedrock_16 |
+| `cdk.svg` | Arch_AWS-Cloud-Development-Kit_16 |
+| `cloudformation.svg` | Arch_AWS-CloudFormation_16 |
+| `cloudfront.svg` | Arch_Amazon-CloudFront_16 |
+| `codepipeline.svg` | Arch_AWS-CodePipeline_16 |
+| `dynamodb.svg` | Arch_Amazon-DynamoDB_16 |
+| `ecr.svg` | Arch_Amazon-Elastic-Container-Registry_16 |
+| `ecs.svg` | Arch_Amazon-Elastic-Container-Service_16 |
+| `fargate.svg` | Arch_AWS-Fargate_16 |
+| `kinesis.svg` | Arch_Amazon-Kinesis_16 |
+| `lambda.svg` | Arch_AWS-Lambda_16 |
+| `rds.svg` | Arch_Amazon-RDS_16 |
+| `rekognition.svg` | Arch_Amazon-Rekognition_16 |
+| `s3.svg` | Arch_Amazon-Simple-Storage-Service_16 |
+| `sns.svg` | Arch_Amazon-Simple-Notification-Service_16 |
+| `sqs.svg` | Arch_Amazon-Simple-Queue-Service_16 |
+
+- Condiciones de uso: según la página oficial, «We allow customers and partners to use these toolkits and assets to create architecture diagrams» y «You can also put icons in materials like whitepapers, presentations, data sheets, and posters». Los nombres y logos de AWS son marcas de Amazon.com, Inc. o sus filiales. En el sitio se muestran sin recortar ni recolorear; la presentación solo añade un radio de esquina del 22 % (2–3 px) por CSS y dibuja el cuadrado 2 px más pequeño que la caja del logo para igualar su peso óptico con los glifos de Simple Icons.
+- No se copian EFS, Cognito ni CodeBuild: las etiquetas compuestas que los nombran muestran el logo de su primer servicio.
+
+## Sin logo
+
+Los conceptos y prácticas sin marca (RAG, LLMOps, FinOps, Event-Driven, Function Calling, Prompt Engineering, Patrón BFF, Mutation testing, Arquitectura hexagonal, OCR, SLM on-premise, Gobernanza de datos, Ingeniería de software, Analítica de datos, WebSockets, UI Automation, DXGI) y las herramientas sin icono en Simple Icons (Strands Agents, pgvector, Ragas, sentence-transformers, Bandit) no llevan logo. En el Marquee conservan su icono Phosphor en cian.

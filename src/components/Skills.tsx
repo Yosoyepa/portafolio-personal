@@ -2,6 +2,7 @@
 
 import { useEffect, useRef } from "react";
 import { animate, stagger, useReducedMotion } from "motion/react";
+import BrandIcon from "@/components/BrandIcon";
 import PortfolioIcon, { type PortfolioIconName } from "@/components/PortfolioIcon";
 import BorderGlow from "@/components/reactbits/BorderGlow";
 import RippleBackground from "@/components/RippleBackground";
@@ -78,8 +79,9 @@ export default function Skills() {
                   <li
                     key={item}
                     data-skill-chip
-                    className="chip transition-colors hover:border-cyan/40 hover:text-fg"
+                    className="chip gap-1.5 transition-colors hover:border-cyan/40 hover:text-fg"
                   >
+                    <BrandIcon name={item} size={12} />
                     {item}
                   </li>
                 ))}

@@ -74,3 +74,18 @@ Criterios, plan y cierre en `docs/tasks/T001_senal-viva.md`.
   (Net4skills · NETEC, julio de 2026), según la memoria profesional del responsable. AgenticRank no se publica: falta
   cotejarlo con el badge.
 - **Métrica.** «500+ commits rastreados» pasa a leer las contribuciones del último año del snapshot.
+
+## Iteración T002 (24 de octubre de 2026)
+
+Criterios en `docs/tasks/T002_viaje-espacial.md`.
+
+- **CloudPath.** Textos tomados del README público de `Yosoyepa/agentic-dev-hackathon-setup` (consultado el 24 de
+  octubre de 2026): proyecto para «Platanus Build Night 2026 — Bogotá @ Buk»; entrevista por voz con Gemini Live, token
+  efímero, consentimiento de micrófono y fallback escrito; mapa React Flow con contratos versionados; arquitectura
+  Vite + React + TypeScript → FastAPI en Railway → Gemini Live, Claude → MiniMax, AWS Knowledge MCP read-only y
+  degradación determinista. El README de `product/api` del mismo repo detalla el token de un solo uso y las rutas de
+  perfil, lección y adaptación. `Yosoyepa/cloudpath-front` es el frontend (Vite, desplegado en
+  `cloudpath-front.vercel.app`); a esta fecha no tiene README propio, así que la descripción sale del repo de la API.
+- **3.er puesto.** Lo declaró el responsable el 24 de octubre de 2026; ninguno de los dos README lo menciona.
+- **Inetum.** Redactado desde la memoria profesional del responsable y anonimizado: sin nombre del cliente, sin
+  versiones internas y sin datos de documentos. Pendiente de revisión del responsable antes de publicar.

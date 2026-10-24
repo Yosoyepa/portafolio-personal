@@ -2,15 +2,17 @@ const career = {
   es: [
     {
       company: "Inetum Colombia S.A.S", role: "Senior AI Engineer", period: "Jul 2026 – Presente", location: "Bogotá · Híbrido", current: true,
-      headline: "Convertir documentos en información confiable.",
-      summary: "Trabajo en inteligencia documental: llevar información de un PDF a una decisión requiere extracción consistente, trazabilidad y control sobre cuándo interviene un modelo.",
-      impact: "Inteligencia documental con control y trazabilidad",
-      stack: ["Python", "OCR", "Arquitectura hexagonal", "SLM on-premise", "Gobernanza de datos"],
+      headline: "Documentos que se convierten en datos con evidencia.",
+      summary: "Desarrollo una plataforma de inteligencia documental para el onboarding crediticio de un cliente del sector financiero: un extractor determinista, expuesto como API, que clasifica cada documento, lo lee con OCR local y devuelve cada campo con su evidencia, o se abstiene cuando no hay certeza. La versión más avanzada está en pruebas con el cliente.",
+      impact: "Cada dato extraído llega con evidencia o con una abstención explícita",
+      stack: ["Python", "FastAPI", "RabbitMQ", "PostgreSQL", "ONNX Runtime", "OpenShift", "Argo CD"],
       bullets: [
-        "Desarrollo plataformas de inteligencia documental (IDP) que combinan extracción determinista con OCR y validación de la información obtenida.",
-        "Aplico arquitectura hexagonal y evaluación por casos para que cada cambio en la extracción pueda revisarse y probarse.",
-        "Integro modelos de lenguaje pequeños (SLM) en entornos locales como fallback controlado, junto con revisión humana y gobernanza de datos.",
-        "Conecto la entrega de IA con prácticas de operación segura e incident response, respaldadas por experiencia cloud y la microcredencial AWS Incident Response Demonstrated.",
+        "Replanteé el alcance del sistema heredado: un motor que podía aprobar documentos por su cuenta pasó a ser un extractor determinista que solo entrega datos con evidencia; la decisión final queda en la aplicación del cliente.",
+        "Diseñé la clasificación por perfiles documentales parametrizados en base de datos y la resolución de cada campo con puntuación y confianza calibrada. Ante la duda, el sistema responde LOW_CONFIDENCE o NOT_FOUND en lugar de inventar un valor.",
+        "OCR local con varios motores (RapidOCR sobre ONNX y Tesseract) y un modelo de lenguaje pequeño on-premise preparado como respaldo controlado, desactivado por defecto y con revisión humana: ningún documento sale a una API externa.",
+        "Arquitectura hexagonal verificada de forma automática (import-linter y pruebas de arquitectura), idempotencia por huella, outbox transaccional y mensajería con RabbitMQ sobre AMQPS con mTLS.",
+        "Entrega guiada por evidencia: ADRs, gates de calidad, modo sombra y canary con kill switches que fallan en cerrado; análisis estático llevado a cero hallazgos y 95 % de cobertura en la API.",
+        "Despliegue en OpenShift con Kustomize y Argo CD, imágenes revisadas con Trivy y Hadolint, y desarrollo asistido por agentes de IA con instrucciones versionadas y un servidor MCP de OCR local.",
       ],
     },
     {
@@ -43,15 +45,17 @@ const career = {
   en: [
     {
       company: "Inetum Colombia S.A.S", role: "Senior AI Engineer", period: "Jul 2026 – Present", location: "Bogotá · Hybrid", current: true,
-      headline: "Turning documents into trustworthy information.",
-      summary: "I work in document intelligence: moving information from a PDF to a decision requires consistent extraction, traceability and control over when a model gets involved.",
-      impact: "Document intelligence with control and traceability",
-      stack: ["Python", "OCR", "Hexagonal architecture", "On-premise SLMs", "Data governance"],
+      headline: "Documents turned into data with evidence.",
+      summary: "I build a document intelligence platform for credit onboarding at a financial-sector client: a deterministic extractor, exposed as an API, that classifies each document, reads it with local OCR and returns every field with its evidence, or abstains when it is not certain. The most advanced version is in testing with the client.",
+      impact: "Every extracted value comes with evidence or an explicit abstention",
+      stack: ["Python", "FastAPI", "RabbitMQ", "PostgreSQL", "ONNX Runtime", "OpenShift", "Argo CD"],
       bullets: [
-        "I develop intelligent document processing (IDP) platforms that combine deterministic extraction, OCR and validation of the extracted information.",
-        "I apply hexagonal architecture and case-based evaluation so every extraction change can be reviewed and tested.",
-        "I integrate small language models (SLMs) in local environments as a controlled fallback, alongside human review and data governance.",
-        "I connect AI delivery with secure operations and incident response, supported by cloud experience and the AWS Incident Response Demonstrated microcredential.",
+        "I reframed the scope of the legacy system: an engine that could approve documents on its own became a deterministic extractor that only delivers data with evidence; the final decision stays in the client's application.",
+        "I designed classification by document profiles parameterized in the database, and resolution of each field with scoring and calibrated confidence. When in doubt, the system answers LOW_CONFIDENCE or NOT_FOUND instead of inventing a value.",
+        "Local OCR with several engines (RapidOCR on ONNX and Tesseract) and a small on-premise language model ready as a controlled fallback, disabled by default and with human review: no document leaves for an external API.",
+        "Hexagonal architecture verified automatically (import-linter and architecture tests), fingerprint-based idempotency, a transactional outbox and RabbitMQ messaging over AMQPS with mTLS.",
+        "Evidence-driven delivery: ADRs, quality gates, shadow mode and canary releases with fail-closed kill switches; static analysis brought to zero findings and 95% coverage on the API.",
+        "Deployment on OpenShift with Kustomize and Argo CD, images checked with Trivy and Hadolint, and development assisted by AI agents with versioned instructions and a local OCR MCP server.",
       ],
     },
     {

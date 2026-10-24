@@ -1,5 +1,7 @@
 import {
   siApacheairflow,
+  siArgo,
+  siClaude,
   siDocker,
   siFastapi,
   siGithubactions,
@@ -15,6 +17,9 @@ import {
   siPydantic,
   siPytest,
   siPython,
+  siRabbitmq,
+  siReact,
+  siRedhatopenshift,
   siRuff,
   siRust,
   siSpringboot,
@@ -51,6 +56,7 @@ export const BRAND_ICONS: Readonly<Record<string, BrandIconData>> = {
   java: si(siOpenjdk), // Simple Icons no publica el logo de Java (Oracle); OpenJDK es la implementación de referencia.
   rust: si(siRust),
   fastapi: si(siFastapi),
+  react: si(siReact),
   "spring boot": si(siSpringboot),
   pydantic: si(siPydantic),
   streamlit: si(siStreamlit),
@@ -58,6 +64,8 @@ export const BRAND_ICONS: Readonly<Record<string, BrandIconData>> = {
   langchain: si(siLangchain),
   mcp: si(siModelcontextprotocol),
   gemini: si(siGooglegemini),
+  "gemini live": si(siGooglegemini),
+  claude: si(siClaude),
   "onnx runtime": si(siOnnx),
   // Datos
   opensearch: si(siOpensearch),
@@ -68,11 +76,14 @@ export const BRAND_ICONS: Readonly<Record<string, BrandIconData>> = {
   "github actions": si(siGithubactions),
   keycloak: si(siKeycloak),
   opentelemetry: si(siOpentelemetry),
+  openshift: si(siRedhatopenshift),
+  "argo cd": si(siArgo),
   pytest: si(siPytest),
   ruff: si(siRuff),
   // Mensajería
   "whatsapp api": si(siWhatsapp),
   telegram: si(siTelegram),
+  rabbitmq: si(siRabbitmq),
   // AWS
   aws: aws("Amazon Web Services", "aws"),
   "amazon bedrock": BEDROCK,

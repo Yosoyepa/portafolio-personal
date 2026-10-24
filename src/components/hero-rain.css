@@ -1,0 +1,22 @@
+/* DataRain as the hero's animated layer: transparent over the nebula (which stays the LCP), under the copy. */
+.dr-root.hero-data-rain { z-index: -1; background: none; }
+
+/* Soft veil over the rain behind the headline and intro, kept with the component's edge vignette. */
+.hero-data-rain .dr-vignette {
+  background:
+    radial-gradient(ellipse 32% 31% at 22% 50%, rgb(7 11 19 / .66), rgb(7 11 19 / .46) 55%, transparent),
+    radial-gradient(ellipse 85% 80% at 50% 46%, transparent 40%, rgb(0 0 0 / var(--dr-vignette)) 100%);
+}
+
+/* A tight halo keeps glyph edges dark when a bright streak crosses them. */
+.signal-hero .signal-title, .signal-hero .signal-description {
+  text-shadow: 0 0 1px #070b13, 0 0 4px #070b13, 0 0 9px #070b13cc, 0 2px 16px #070b13;
+}
+
+@media (max-width: 800px) {
+  .hero-data-rain .dr-vignette {
+    background:
+      radial-gradient(ellipse 72% 18% at 50% 24%, rgb(7 11 19 / .66), rgb(7 11 19 / .46) 55%, transparent),
+      radial-gradient(ellipse 85% 80% at 50% 46%, transparent 40%, rgb(0 0 0 / var(--dr-vignette)) 100%);
+  }
+}

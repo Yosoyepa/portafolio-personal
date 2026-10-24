@@ -1,4 +1,5 @@
-// component.tsx
+"use client";
+
 import { useEffect, useRef } from "react";
 import "./data-rain.css";
 
@@ -16,10 +17,16 @@ export interface DataRainProps {
   autopilot?: boolean;
   fullscreen?: boolean;
   palette?: DataRainPalette;
+  /** Stops the loop and keeps the last frame. */
+  paused?: boolean;
+  /** Backing-store budget: device-pixel-ratio cap (default 2) and total pixels (default 4.5 M). */
+  maxDpr?: number;
+  maxPixels?: number;
 }
 
 interface EngineApi {
   refresh: () => void;
+  sync: () => void;
 }
 
 type RGB = readonly [number, number, number];
@@ -33,6 +40,7 @@ const PUFFS = 32; // vortex pool size
 const TAU = Math.PI * 2;
 const AGE_BUCKETS = 6;
 const SEGS_PER_BUCKET = 3;
+const PRESIM_SLICE_MS = 8; // keeps every warm-up task far below the 50 ms long-task threshold
 
 const DEFAULT_CALM: RGB = [34, 230, 255];
 const DEFAULT_MID: RGB = [138, 92, 255];
@@ -139,6 +147,20 @@ export default function DataRain(props: DataRainProps) {
     let disposed = false;
     let initialised = false;
     let live = false;
+    let inView = false;
+    let running = false;
+    let listening = false;
+
+    /* deferred work: idle callbacks where available */
+    const hasIdle = typeof window.requestIdleCallback === "function";
+    const idle = (fn: () => void): number =>
+      hasIdle ? window.requestIdleCallback(fn, { timeout: 400 }) : window.setTimeout(fn, 16);
+    const cancelIdle = (id: number): void => {
+      if (hasIdle) window.cancelIdleCallback(id);
+      else window.clearTimeout(id);
+    };
+    let bootJob = 0;
+    let presimJob = 0;
 
     /* geometry */
     let w = 0;
@@ -667,9 +689,22 @@ export default function DataRain(props: DataRainProps) {
 
     /* ─────────────── lifecycle helpers ─────────────── */
 
-    const presim = (seconds: number): void => {
-      const n = Math.round(seconds / STEP);
-      for (let s = 0; s < n; s++) simulate();
+    /** Fast-forwards the field in short idle slices instead of one long task, then calls `done`. */
+    const presim = (seconds: number, done: () => void): void => {
+      if (presimJob) cancelIdle(presimJob);
+      let left = Math.round(seconds / STEP);
+      const slice = (): void => {
+        presimJob = 0;
+        if (disposed) return;
+        const t0 = performance.now();
+        while (left > 0 && performance.now() - t0 < PRESIM_SLICE_MS) {
+          simulate();
+          left--;
+        }
+        if (left > 0) presimJob = idle(slice);
+        else done();
+      };
+      presimJob = idle(slice);
     };
 
     const rebuildStatic = (): void => {
@@ -690,16 +725,19 @@ export default function DataRain(props: DataRainProps) {
       prevSrc = 2;
       aCount = 0;
       pAlive.fill(0);
-      presim(3);
-      render();
+      presim(3, () => {
+        render();
+        root.dataset.ready = "";
+      });
     };
 
     const resize = (): void => {
       const rect = root.getBoundingClientRect();
       const nw = Math.max(1, rect.width || window.innerWidth);
       const nh = Math.max(1, rect.height || window.innerHeight);
-      let d = Math.min(window.devicePixelRatio || 1, 2);
-      if (nw * nh * d * d > 4.5e6) d = Math.sqrt(4.5e6 / (nw * nh));
+      const budget = propsRef.current.maxPixels ?? 4.5e6;
+      let d = Math.min(window.devicePixelRatio || 1, propsRef.current.maxDpr ?? 2);
+      if (nw * nh * d * d > budget) d = Math.sqrt(budget / (nw * nh));
       if (nw === w && nh === h && d === dpr) return;
 
       w = nw;
@@ -749,7 +787,7 @@ export default function DataRain(props: DataRainProps) {
     /* ─────────────── main loop ─────────────── */
 
     const frame = (now: number): void => {
-      if (disposed) return;
+      if (disposed || !running) return;
       const dtRaw = Math.max(0, now - last);
       last = now;
       acc += Math.min(0.05, dtRaw / 1000);
@@ -800,23 +838,51 @@ export default function DataRain(props: DataRainProps) {
       raf = requestAnimationFrame(frame);
     };
 
-    const onVisibility = (): void => {
-      if (document.hidden) {
+    /* pointer listeners exist only while the loop runs */
+    const listen = (on: boolean): void => {
+      if (on === listening) return;
+      listening = on;
+      if (on) {
+        window.addEventListener("pointermove", onMove, { passive: true });
+        window.addEventListener("pointerdown", onMove, { passive: true });
+        window.addEventListener("pointerup", onUp, { passive: true });
+        window.addEventListener("pointercancel", onLeave, { passive: true });
+        window.addEventListener("blur", onLeave);
+        document.documentElement.addEventListener("pointerleave", onLeave);
+      } else {
+        window.removeEventListener("pointermove", onMove);
+        window.removeEventListener("pointerdown", onMove);
+        window.removeEventListener("pointerup", onUp);
+        window.removeEventListener("pointercancel", onLeave);
+        window.removeEventListener("blur", onLeave);
+        document.documentElement.removeEventListener("pointerleave", onLeave);
+      }
+    };
+
+    /* run only when live, in view, with the tab visible and not paused */
+    const sync = (): void => {
+      const next = live && !disposed && inView && !document.hidden && !propsRef.current.paused;
+      if (next === running) return;
+      running = next;
+      if (next) {
+        listen(true);
+        start();
+      } else {
         cancelAnimationFrame(raf);
         raf = 0;
-      } else if (live && !disposed) {
-        start();
+        listen(false);
+        onLeave();
       }
     };
 
     /* ─────────────── init ─────────────── */
 
-    resize();
-    buildStyles();
-    seedAll();
-    applyCount(true);
-    cx = pcx = tgtX = w * 0.5;
-    cy = pcy = tgtY = h * 0.5;
+    const io = new IntersectionObserver(([entry]) => {
+      inView = entry.isIntersecting;
+      sync();
+    });
+    io.observe(root);
+    document.addEventListener("visibilitychange", sync);
 
     const ro = new ResizeObserver(() => resize());
     ro.observe(root);
@@ -829,40 +895,48 @@ export default function DataRain(props: DataRainProps) {
           rebuildStatic();
         } else {
           applyCount(false);
+          if (!running) render();
         }
       },
+      sync,
     };
 
-    if (reduced) {
+    // Deferred past hydration; the layer stays transparent until the warm-up is done, then fades in.
+    const boot = (): void => {
+      bootJob = 0;
+      if (disposed) return;
+      resize();
+      buildStyles();
+      seedAll();
+      applyCount(true);
+      cx = pcx = tgtX = w * 0.5;
+      cy = pcy = tgtY = h * 0.5;
       initialised = true;
-      rebuildStatic();
-    } else {
-      presim(2.5);
-      render();
-      initialised = true;
-      live = true;
-      window.addEventListener("pointermove", onMove, { passive: true });
-      window.addEventListener("pointerdown", onMove, { passive: true });
-      window.addEventListener("pointerup", onUp, { passive: true });
-      window.addEventListener("pointercancel", onLeave, { passive: true });
-      window.addEventListener("blur", onLeave);
-      document.documentElement.addEventListener("pointerleave", onLeave);
-      document.addEventListener("visibilitychange", onVisibility);
-      start();
-    }
+      if (reduced) {
+        rebuildStatic();
+        return;
+      }
+      presim(2.5, () => {
+        render();
+        root.dataset.ready = "";
+        live = true;
+        sync();
+      });
+    };
+    bootJob = idle(boot);
 
     return () => {
       disposed = true;
       live = false;
+      running = false;
       cancelAnimationFrame(raf);
       raf = 0;
-      window.removeEventListener("pointermove", onMove);
-      window.removeEventListener("pointerdown", onMove);
-      window.removeEventListener("pointerup", onUp);
-      window.removeEventListener("pointercancel", onLeave);
-      window.removeEventListener("blur", onLeave);
-      document.documentElement.removeEventListener("pointerleave", onLeave);
-      document.removeEventListener("visibilitychange", onVisibility);
+      if (bootJob) cancelIdle(bootJob);
+      if (presimJob) cancelIdle(presimJob);
+      delete root.dataset.ready;
+      listen(false);
+      io.disconnect();
+      document.removeEventListener("visibilitychange", sync);
       ro.disconnect();
       apiRef.current = null;
       haloGradient = null;
@@ -873,6 +947,10 @@ export default function DataRain(props: DataRainProps) {
   useEffect(() => {
     apiRef.current?.refresh();
   }, [props.count, palette?.calm, palette?.mid, palette?.hot]);
+
+  useEffect(() => {
+    apiRef.current?.sync();
+  }, [props.paused]);
 
   const fullscreen = props.fullscreen ?? true;
   const cls =

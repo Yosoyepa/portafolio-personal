@@ -179,14 +179,14 @@ function useCommitPulse(host: RefObject<HTMLDivElement | null>, index: number, r
       timer = window.setTimeout(beat, landed.current ? SWEEP_MS : 0);
       landed.current = true;
     };
-    if (grid.dataset.reveal === "done") settle();
+    if (grid.hasAttribute("data-landed")) settle();
     else {
       observer = new MutationObserver(() => {
-        if (grid.dataset.reveal !== "done") return;
+        if (!grid.hasAttribute("data-landed")) return;
         observer?.disconnect();
         settle();
       });
-      observer.observe(grid, { attributes: true, attributeFilter: ["data-reveal"] });
+      observer.observe(grid, { attributes: true, attributeFilter: ["data-landed"] });
     }
     return () => {
       observer?.disconnect();

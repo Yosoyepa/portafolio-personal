@@ -1,13 +1,8 @@
 /* Editorial rhythm, bounded motion, and a visual language shared by the case studies. */
 :root { --accent-soft: #b2eee2; --copy-soft: #b3bdce; }
 
-/* El navegador puede saltarse layout/estilo/pintura de las secciones que aún
-   no entran al viewport: primera pintura y scroll más baratos. `auto <n>`
-   recuerda la altura real renderizada, así el salto de scrollbar es mínimo. */
-#experiencia, #proyectos, #stack, #certificaciones, #contacto {
-  content-visibility: auto;
-  contain-intrinsic-size: auto 900px;
-}
+/* Sin content-visibility: maquetar cada sección al entrar en pantalla, en pleno scroll, producía tareas de
+   100–200 ms (medido con rueda sobre el export). Cada sección se maqueta una vez al cargar. */
 
 .credential-study-note { margin-top: 24px; border-left: 1px solid #a1bdd44d; padding-left: 18px; max-width: 780px; font-size: 13px; line-height: 1.9; color: #adbecf; }
 button, summary { cursor: pointer; }

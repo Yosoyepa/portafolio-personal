@@ -571,10 +571,16 @@ export const LaserFlow = ({
       adjustDprIfNeeded(performance.now());
     };
 
-    renderLoop = createRenderLoop(mount, animate, { fps: 30, enabled: () => !pausedRef.current });
+    // Compile off the main thread (KHR_parallel_shader_compile) before the first frame: a synchronous link here blocked
+    // scrolling for 400–600 ms as the profile section approached.
+    let disposed = false;
+    renderer.compileAsync(scene, camera).catch(() => {}).then(() => {
+      if (!disposed) renderLoop = createRenderLoop(mount, animate, { fps: 30, enabled: () => !pausedRef.current });
+    });
 
     return () => {
-      renderLoop.dispose();
+      disposed = true;
+      renderLoop?.dispose();
       cancelAnimationFrame(resizeRaf);
       ro.disconnect();
       document.removeEventListener('visibilitychange', onVis);

@@ -49,9 +49,10 @@
 .gh-dots i:nth-child(3) { --dot: #e9c595; }
 .gh-panel:hover .gh-dots i, .gh-panel:focus-within .gh-dots i { background: var(--dot); }
 .gh-command { display: flex; flex: 1; min-width: 0; align-items: baseline; gap: 9px; font: 11.5px/1.6 var(--font-mono); color: var(--foreground); overflow-wrap: anywhere; }
-.gh-command-text { display: grid; min-width: 0; }
-.gh-command-text > span { grid-area: 1 / 1; }
+.gh-command-text { position: relative; display: block; min-width: 0; }
 .gh-command-ghost { visibility: hidden; }
+/* The ghost copy fixes the size; the typed layer is its own layout root, so each keystroke stays inside it. */
+.gh-command-typed { position: absolute; inset: 0; contain: strict; }
 .gh-word { white-space: nowrap; }
 .gh-prompt { color: var(--accent); }
 .gh-tok-bin { color: #adf3ed; }
@@ -95,11 +96,12 @@
 .gh-months { display: grid; flex: 1 1 auto; min-height: 84px; grid-template-columns: repeat(var(--months), minmax(0, 1fr)); gap: 6px; margin: 0; padding: 0; list-style: none; }
 .gh-months li { display: grid; min-width: 0; grid-template-rows: minmax(0, 1fr) auto; gap: 7px; }
 .gh-month-bar { position: relative; border-radius: 4px 4px 2px 2px; background: color-mix(in oklch, var(--foreground) 2.2%, transparent); }
-.gh-month-bar i { position: absolute; bottom: 0; left: 50%; width: min(100%, 24px); height: 0; border-radius: 3px 3px 1px 1px; background: linear-gradient(to top, color-mix(in oklch, var(--accent) 12%, var(--gh-panel)), color-mix(in oklch, var(--accent) 50%, var(--gh-panel))); transform: translateX(-50%); transition: height var(--duration-spring) var(--ease-spring) calc(var(--order) * 28ms); }
-.gh-month-bar i::before { content: ""; position: absolute; inset: 0 0 auto; height: 2px; border-radius: inherit; background: color-mix(in oklch, var(--accent) 82%, var(--gh-panel)); }
+/* Bars grow with transform (compositor) instead of height, which relaid out the whole page on every frame. */
+.gh-month-bar i { --bar: max(.02, var(--ratio)); position: absolute; bottom: 0; left: 50%; width: min(100%, 24px); height: 100%; border-radius: 3px 3px 1px 1px; background: linear-gradient(to top, color-mix(in oklch, var(--accent) 12%, var(--gh-panel)), color-mix(in oklch, var(--accent) 50%, var(--gh-panel))); transform: translateX(-50%) scaleY(0); transform-origin: 50% 100%; transition: transform var(--duration-spring) var(--ease-spring) calc(var(--order) * 28ms); }
+.gh-month-bar i::before { content: ""; position: absolute; inset: 0 0 auto; height: 2px; border-radius: inherit; background: color-mix(in oklch, var(--accent) 82%, var(--gh-panel)); transform: scaleY(calc(1 / var(--bar))); transform-origin: 50% 0; }
 .gh-months[data-direction="back"] .gh-month-bar i { transition-delay: calc(var(--order-back) * 28ms); }
-.gh-months[data-shown] .gh-month-bar i { height: max(2px, calc(var(--ratio) * 100%)); }
-@starting-style { .gh-months[data-shown] .gh-month-bar i { height: 0; } }
+.gh-months[data-shown] .gh-month-bar i { transform: translateX(-50%) scaleY(var(--bar)); }
+@starting-style { .gh-months[data-shown] .gh-month-bar i { transform: translateX(-50%) scaleY(0); } }
 .gh-months li[data-empty] .gh-month-bar i { background: color-mix(in oklch, var(--foreground) 12%, var(--gh-panel)); }
 .gh-months li[data-empty] .gh-month-bar i::before { display: none; }
 .gh-months li[data-peak] .gh-month-bar i { background: linear-gradient(to top, color-mix(in oklch, var(--accent) 30%, var(--gh-panel)), var(--accent)); box-shadow: 0 0 16px #63dce547; }

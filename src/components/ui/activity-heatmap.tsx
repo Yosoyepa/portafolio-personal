@@ -60,6 +60,9 @@ export interface ActivityHeatmapProps {
   locale?: string;
   /** Translated words around the numbers. Anything left out keeps its English default. */
   strings?: Partial<ActivityHeatmapStrings>;
+  /** Square size in px, measured by the host. Without it the cells size themselves from the container width (`cqi`),
+   *  which makes every layout change inside the root recompute all of them. */
+  cellSize?: number;
   className?: string;
 }
 
@@ -407,6 +410,7 @@ export function ActivityHeatmap({
   actions,
   locale = "en-US",
   strings,
+  cellSize,
   className,
 }: ActivityHeatmapProps) {
   const reduced = useReducedMotionSafe();
@@ -768,6 +772,7 @@ export function ActivityHeatmap({
     <div
       ref={rootRef}
       className={[styles.root, className].filter(Boolean).join(" ")}
+      style={cellSize ? { containerType: "normal" } : undefined}
     >
       <div className={styles.header}>
         <p className={styles.summary}>
@@ -792,7 +797,7 @@ export function ActivityHeatmap({
       <div ref={scrollerRef} className={styles.scroller}>
         <div
           className={styles.canvas}
-          style={{ "--weeks": model.weeks } as CSSProperties}
+          style={{ "--weeks": model.weeks, ...(cellSize ? { "--cell": `${cellSize}px` } : {}) } as CSSProperties}
         >
           <div className={styles.months} aria-hidden="true">
             {model.months.map((month, order) => (

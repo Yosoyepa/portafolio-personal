@@ -8,7 +8,13 @@ import AmbientBackground from "@/components/AmbientBackground";
 import AccordionGallery from "@/components/reactbits/AccordionGallery";
 import { useLang } from "@/components/providers/LanguageProvider";
 
-const BADGES = ["/certs/aws-data-engineer.png", "/certs/aws-ai-practitioner.png", "/certs/aws-cloud-practitioner.png"];
+// Insignias oficiales: las tres certificaciones base traen fondo blanco y se recortan al hexágono en CSS; las de Credly
+// (Early Adopter y Demonstrated) ya vienen con fondo transparente.
+const BADGES: (string | undefined)[][] = [
+  ["/certs/aws-data-engineer.png", "/certs/aws-ai-practitioner.png", "/certs/aws-cloud-practitioner.png", "/certs/aws-ai-practitioner-early-adopter.webp"],
+  ["/certs/aws-agentic-ai-demonstrated.webp", "/certs/aws-mlops-demonstrated.webp", "/certs/aws-serverless-demonstrated.webp", "/certs/aws-incident-response-demonstrated.webp"],
+  [],
+];
 const MONOGRAMS = [["DE", "AI", "CP", "EA"], ["AI", "ML", "λ", "IR"], ["ML", "SD", "UN", "A", "IBM", "DS4A"]];
 const ACCENTS = ["#ac8cff", "#63dce5", "#f3be85", "#94baff", "#9be3d4", "#b9b3f2"];
 const LABELS = {
@@ -62,8 +68,8 @@ export default function Certifications() {
           date: item.date,
           shortTitle: ui.short[group][i],
           accent: ACCENTS[i],
-          visual: group === 0 && BADGES[i]
-            ? <img src={BADGES[i]} alt="" width={240} height={240} loading="lazy" className="credential-badge" />
+          visual: BADGES[group][i]
+            ? <img src={BADGES[group][i]} alt="" width={240} height={240} loading="lazy" className={BADGES[group][i]!.endsWith(".webp") ? "credential-badge credential-badge--open" : "credential-badge"} />
             : <div className="credential-monogram"><span>{MONOGRAMS[group][i]}</span><small>{group === 1 ? "DEMONSTRATED" : group === 0 ? "EARLY ADOPTER" : item.issuer}</small></div>,
         }))} />
         <div className="credential-footer">

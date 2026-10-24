@@ -292,11 +292,30 @@ function ProfileCard({ lang }: { lang: "es" | "en" }) {
  *  contributions and leave gaps (2024 is a real zero) that read like missing data; the snapshot keeps them all. */
 const RANGES = snapshot.ranges.filter((range, index, all) => range.id === "last-year" || all.filter(item => item.id !== "last-year").indexOf(range) < 2);
 
+/** Same fit as the heatmap's own `clamp(9px, (100cqi - label - gap × 53) / 53, 15px)`, measured once per resize so the
+ *  371 cells stop depending on a container query. */
+function useCellSize(host: RefObject<HTMLElement | null>) {
+  const [cell, setCell] = useState<number | undefined>(undefined);
+  useEffect(() => {
+    const node = host.current;
+    if (!node || typeof ResizeObserver === "undefined") return;
+    const observer = new ResizeObserver(([entry]) => {
+      const width = entry.contentBoxSize?.[0]?.inlineSize ?? entry.contentRect.width;
+      const next = Math.round(Math.min(15, Math.max(9, (width - 30 - 3 * 53) / 53)) * 4) / 4;
+      setCell(current => (current === next ? current : next));
+    });
+    observer.observe(node);
+    return () => observer.disconnect();
+  }, [host]);
+  return cell;
+}
+
 function ActivityPanel({ lang }: { lang: "es" | "en" }) {
   const ui = LABELS[lang];
   const reduced = useReducedMotionSafe();
   const host = useRef<HTMLDivElement>(null);
   const inView = useInView(host, { once: true, amount: 0.35 });
+  const cellSize = useCellSize(host);
   const [rangeId, setRangeId] = useState(RANGES[0].id);
   const [back, setBack] = useState(false);
   const [selected, setSelected] = useState<string | null>(null);
@@ -348,6 +367,7 @@ function ActivityPanel({ lang }: { lang: "es" | "en" }) {
           locale={ui.locale}
           weekStartsOn={0}
           thresholds={stats.thresholds}
+          cellSize={cellSize}
           strings={lang === "es" ? ES_STRINGS : EN_STRINGS}
           selectedDate={selected}
           onSelectDate={setSelected}

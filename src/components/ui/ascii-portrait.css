@@ -1,0 +1,4 @@
+/* ASCII portrait: square canvas that fills its container; the frame and backdrop belong to the host section. */
+.ap-root { position: relative; width: 100%; aspect-ratio: 1; overflow: hidden; contain: layout paint; }
+.ap-canvas, .ap-fallback { position: absolute; inset: 0; display: block; width: 100%; height: 100%; }
+.ap-fallback { object-fit: cover; }

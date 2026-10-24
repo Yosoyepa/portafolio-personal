@@ -1,0 +1,163 @@
+/* Activity: a GitHub profile reread in the site's terminal language. The heatmap module keeps every rule it shipped
+   with; its dark theme comes only from the variables declared on .gh-activity. */
+.gh-activity {
+  --gh-panel: #0a0e18;
+  --foreground: #eef1fb;
+  --background: #05060b;
+  --surface: var(--gh-panel);
+  --heatmap-surface: var(--gh-panel);
+  --accent: #63dce5;
+  --text-secondary: #a4adc4;
+  --text-muted: #858fa8; /* 5.96:1 on the panel */
+  --border-strong: #26304d;
+  --focus-ring: #adf3ed;
+  --space-2: .5rem;
+  --space-3: .75rem;
+  --space-4: 1rem;
+  --text-xs: .75rem;
+  --text-sm: .875rem;
+  --leading-body: 1.5;
+  --radius-control: 8px;
+  --shadow-raised: 0 16px 36px -14px rgb(0 0 0 / .85), 0 2px 8px rgb(0 0 0 / .5);
+  --ease-standard: cubic-bezier(.22, 1, .36, 1);
+  --ease-enter: cubic-bezier(.16, 1, .3, 1);
+  /* motionTokens.spring.snappy (visualDuration .26 s, bounce .12), sampled for CSS by Motion's spring(). */
+  --ease-spring: linear(0, .1371, .3825, .6066, .7719, .8794, .9428, .977, .9937, 1.0006, 1.0028, 1.0028, 1.0022, 1.0015, 1.0009, 1.0005, 1);
+  --duration-spring: 500ms;
+  --duration-fast: 160ms;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 24px;
+}
+@media (min-width: 1024px) { .gh-activity { grid-template-columns: minmax(0, 300px) minmax(0, 1fr); } }
+#actividad .section-description { max-width: 340px; line-height: 1.8; }
+
+/* The heatmap tags its own wave with data-reveal, the attribute the site uses for scroll reveals. The grid itself stays
+   visible, so only the component's wave brings it in. */
+.anim-ready .gh-activity [role="grid"][data-reveal] { opacity: 1; }
+
+.gh-activity .gh-card { background: var(--gh-panel); border-radius: 18px; }
+/* The data panel keeps the edge light but not the cursor wash: the sticky weekday column must match the panel exactly. */
+.gh-activity .gh-panel::before { display: none; }
+
+/* Terminal chrome. */
+.gh-bar { display: flex; align-items: center; gap: 10px 14px; min-height: 50px; padding: 10px 16px 10px 20px; border-bottom: 1px solid #ffffff10; border-radius: 18px 18px 0 0; background: linear-gradient(180deg, #ffffff06, #ffffff01); }
+.gh-dots { display: flex; flex: none; gap: 6px; }
+.gh-dots i { width: 8px; height: 8px; border-radius: 50%; background: color-mix(in srgb, var(--dot) 34%, var(--gh-panel)); transition: background .3s; }
+.gh-dots i:nth-child(1) { --dot: #63dce5; }
+.gh-dots i:nth-child(2) { --dot: #a795ee; }
+.gh-dots i:nth-child(3) { --dot: #e9c595; }
+.gh-panel:hover .gh-dots i, .gh-panel:focus-within .gh-dots i { background: var(--dot); }
+.gh-command { display: flex; flex: 1; min-width: 0; align-items: baseline; gap: 9px; font: 11.5px/1.6 var(--font-mono); color: var(--foreground); overflow-wrap: anywhere; }
+.gh-command-text { display: grid; min-width: 0; }
+.gh-command-text > span { grid-area: 1 / 1; }
+.gh-command-ghost { visibility: hidden; }
+.gh-word { white-space: nowrap; }
+.gh-prompt { color: var(--accent); }
+.gh-tok-bin { color: #adf3ed; }
+.gh-tok-flag { color: var(--text-muted); }
+.gh-tok-value { color: #c4b5fa; }
+.gh-caret { display: inline-block; width: .55em; height: 1.15em; margin-left: 2px; vertical-align: -.22em; border-radius: 1px; background: var(--accent); box-shadow: 0 0 8px #63dce566; animation: gh-caret 1.1s steps(1) infinite; }
+.gh-caret[data-typing] { animation: none; }
+@keyframes gh-caret { 50% { opacity: 0; } }
+.gh-chip { flex: none; margin-left: auto; padding: 4px 10px; border: 1px solid #63dce52e; border-radius: 999px; background: #63dce50a; color: #adf3ed; font: 10px/1.4 var(--font-mono); letter-spacing: .04em; white-space: nowrap; }
+
+/* Data panel. */
+.gh-panel { display: flex; flex-direction: column; }
+.gh-screen { display: flex; flex: 1; flex-direction: column; gap: 22px; padding: 22px 24px 20px; }
+.gh-activity .gh-ranges { flex-wrap: wrap; max-width: 100cqi; padding: 3px; gap: 2px; border-radius: 10px; }
+.gh-activity .gh-ranges button { min-height: 32px; padding: 6px 10px; border-radius: 7px; color: var(--text-muted); font: 11px/1 var(--font-mono); }
+.gh-activity .gh-ranges button:hover, .gh-activity .gh-ranges button[aria-pressed="true"] { color: var(--foreground); }
+.gh-activity .gh-ranges .segment-indicator { background: #63dce512; box-shadow: inset 0 0 0 1px #63dce533; }
+
+/* Commit activation: level-four days glow, in step with the sweep that recolors them, and the latest active day beats. */
+.gh-activity [role="gridcell"] { position: relative; }
+.gh-activity [role="gridcell"]::after { content: ""; position: absolute; inset: 0; border-radius: inherit; pointer-events: none; box-shadow: 0 0 8px #63dce570, 0 0 2px #adf3ed66; opacity: 0; transition: opacity .32s var(--ease-standard) var(--delay); }
+.gh-activity [role="gridcell"][data-level="4"]::after { opacity: 1; }
+.gh-activity [role="gridcell"][data-pulse] { z-index: 1; }
+.gh-activity [role="gridcell"][data-pulse]::before { content: ""; position: absolute; inset: 0; border-radius: inherit; pointer-events: none; animation: gh-commit-pulse 900ms var(--ease-enter) 3 both; }
+@keyframes gh-commit-pulse { from { box-shadow: 0 0 0 0 #63dce5d9; } to { box-shadow: 0 0 0 7px #63dce500; } }
+
+.gh-stats { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); margin: 0; padding-top: 20px; border-top: 1px solid #ffffff0f; }
+.gh-stat { min-width: 0; padding: 0 16px; border-left: 1px solid #ffffff0f; }
+.gh-stat:first-child { padding-left: 0; border-left: 0; }
+.gh-stat dt { font: 9.5px/1.4 var(--font-mono); letter-spacing: .14em; text-transform: uppercase; color: var(--text-muted); }
+.gh-stat dd { margin: 0; }
+.gh-stat-value { display: flex; align-items: baseline; gap: 7px; margin-top: 10px; color: var(--foreground); font: 500 26px/1.1 var(--font-display); letter-spacing: -.03em; font-variant-numeric: tabular-nums; }
+.gh-stat-unit { color: var(--text-secondary); font: 12px/1 var(--font-body); letter-spacing: 0; }
+.gh-stat small { display: block; margin-top: 7px; color: var(--text-muted); font: 10px/1.5 var(--font-mono); }
+
+/* Monthly rhythm: grows into the height the profile card leaves, between 64 and 116 px of bars. */
+.gh-rhythm { display: flex; flex: 1 1 auto; flex-direction: column; gap: 12px; max-height: 196px; padding-top: 18px; border-top: 1px solid #ffffff0f; }
+.gh-rhythm-head { display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: 4px 16px; }
+.gh-rhythm-peak { color: var(--text-muted); font: 10px/1.4 var(--font-mono); }
+.gh-rhythm-peak span { color: #adf3ed; }
+.gh-months { display: grid; flex: 1 1 auto; min-height: 84px; grid-template-columns: repeat(var(--months), minmax(0, 1fr)); gap: 6px; margin: 0; padding: 0; list-style: none; }
+.gh-months li { display: grid; min-width: 0; grid-template-rows: minmax(0, 1fr) auto; gap: 7px; }
+.gh-month-bar { position: relative; border-radius: 4px 4px 2px 2px; background: color-mix(in oklch, var(--foreground) 2.2%, transparent); }
+.gh-month-bar i { position: absolute; bottom: 0; left: 50%; width: min(100%, 24px); height: 0; border-radius: 3px 3px 1px 1px; background: linear-gradient(to top, color-mix(in oklch, var(--accent) 12%, var(--gh-panel)), color-mix(in oklch, var(--accent) 50%, var(--gh-panel))); transform: translateX(-50%); transition: height var(--duration-spring) var(--ease-spring) calc(var(--order) * 28ms); }
+.gh-month-bar i::before { content: ""; position: absolute; inset: 0 0 auto; height: 2px; border-radius: inherit; background: color-mix(in oklch, var(--accent) 82%, var(--gh-panel)); }
+.gh-months[data-direction="back"] .gh-month-bar i { transition-delay: calc(var(--order-back) * 28ms); }
+.gh-months[data-shown] .gh-month-bar i { height: max(2px, calc(var(--ratio) * 100%)); }
+@starting-style { .gh-months[data-shown] .gh-month-bar i { height: 0; } }
+.gh-months li[data-empty] .gh-month-bar i { background: color-mix(in oklch, var(--foreground) 12%, var(--gh-panel)); }
+.gh-months li[data-empty] .gh-month-bar i::before { display: none; }
+.gh-months li[data-peak] .gh-month-bar i { background: linear-gradient(to top, color-mix(in oklch, var(--accent) 30%, var(--gh-panel)), var(--accent)); box-shadow: 0 0 16px #63dce547; }
+.gh-months li[data-peak] .gh-month-bar i::before { background: #eafcff; }
+.gh-month-label { overflow: hidden; color: var(--text-muted); font: 9.5px/1 var(--font-mono); text-align: center; white-space: nowrap; }
+.gh-months li[data-peak] .gh-month-label { color: #adf3ed; }
+
+.gh-log { display: flex; min-height: 37px; align-items: flex-end; margin: auto 0 0; padding-top: 16px; border-top: 1px solid #ffffff0f; color: var(--text-secondary); font: 11.5px/1.7 var(--font-mono); }
+.gh-log-entry { display: block; animation: gh-log-in .32s var(--ease-enter); }
+.gh-log-dot { margin-right: .15em; color: var(--accent); text-shadow: 0 0 10px #63dce5aa; }
+.gh-log-hash { color: #adf3ed; }
+.gh-log-sep { margin: 0 .2em; color: #5d6680; }
+.gh-log strong { color: var(--foreground); font-weight: 500; }
+.gh-log-empty { color: var(--text-muted); }
+@keyframes gh-log-in { from { opacity: 0; transform: translateY(4px); } }
+
+/* Profile card. */
+.gh-profile { display: grid; align-content: start; gap: 22px; padding: 16px 16px 20px; }
+.gh-frame { overflow: hidden; border: 1px solid #ffffff12; border-radius: 12px; background: #060910; }
+.gh-frame-bar { overflow: hidden; margin: 0; padding: 9px 12px; border-bottom: 1px solid #ffffff0d; color: var(--foreground); font: 10.5px/1.4 var(--font-mono); white-space: nowrap; text-overflow: ellipsis; }
+.gh-frame-bar span { color: var(--accent); }
+.gh-avatar { position: relative; width: 100%; aspect-ratio: 1; overflow: hidden; background: #05070d; }
+.gh-avatar img { display: block; width: 100%; height: 100%; object-fit: cover; }
+.gh-identity { padding: 0 6px; }
+.gh-identity h3 { color: var(--foreground); font: 500 23px/1.2 var(--font-display); letter-spacing: -.035em; }
+.gh-handle { margin-top: 4px; color: var(--text-muted); font: 12px/1.5 var(--font-mono); }
+.gh-bio { margin-top: 14px; color: var(--text-secondary); font-size: 13px; line-height: 1.7; }
+.gh-link { display: inline-flex; align-items: center; gap: 9px; min-height: 44px; margin-top: 6px; color: #c1d3df; font: 11.5px var(--font-mono); transition: color .2s; }
+.gh-link > svg:last-child { transition: transform .2s; }
+.gh-link:hover { color: #adf3ed; }
+.gh-link:hover > svg:last-child { transform: translate(2px, -2px); }
+.gh-langs { padding: 18px 6px 0; border-top: 1px solid #ffffff0f; }
+.gh-label { color: var(--text-muted); font: 9.5px/1.4 var(--font-mono); letter-spacing: .14em; text-transform: uppercase; }
+.gh-lang-bar { display: flex; gap: 2px; height: 8px; margin-top: 12px; overflow: hidden; border-radius: 999px; background: #ffffff08; }
+.gh-lang-bar i { flex: var(--share) 1 0; min-width: 2px; background: var(--lang); transform: scaleX(0); transform-origin: left; transition: transform .7s var(--ease-enter) calc(var(--order) * 70ms); }
+.gh-lang-bar[data-shown] i { transform: scaleX(1); }
+.gh-lang-list { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px 16px; margin-top: 14px; color: var(--text-secondary); font-size: 12px; }
+.gh-lang-list li { display: flex; min-width: 0; align-items: center; gap: 8px; }
+.gh-lang-list i { width: 8px; height: 8px; flex: none; border-radius: 50%; }
+.gh-lang-list span { margin-left: auto; color: var(--text-muted); font: 10.5px var(--font-mono); font-variant-numeric: tabular-nums; }
+
+@media (min-width: 640px) and (max-width: 1023px) {
+  .gh-profile { grid-template-columns: 250px minmax(0, 1fr); align-items: start; gap: 22px 28px; }
+  .gh-frame { grid-row: 1 / 3; }
+  .gh-identity { padding-top: 8px; }
+}
+@media (max-width: 767px) {
+  .gh-activity .gh-ranges { display: grid; width: 100cqi; grid-template-columns: repeat(4, minmax(0, 1fr)); }
+  .gh-activity .gh-ranges button { min-height: 38px; padding: 6px 4px; font-size: 10.5px; line-height: 1.2; }
+}
+@media (max-width: 639px) {
+  .gh-bar { flex-wrap: wrap; padding: 12px 14px 12px 16px; }
+  .gh-command { flex-basis: 100%; order: 3; font-size: 11px; }
+  .gh-screen { gap: 20px; padding: 18px 16px 16px; }
+  .gh-stats { grid-template-columns: repeat(2, minmax(0, 1fr)); row-gap: 20px; }
+  .gh-stat:nth-child(3) { padding-left: 0; border-left: 0; }
+  .gh-stat-value { font-size: 24px; }
+  .gh-months { gap: 4px; min-height: 76px; }
+  .gh-months li:nth-child(even) .gh-month-label { visibility: hidden; }
+  .gh-log { font-size: 11px; }
+}

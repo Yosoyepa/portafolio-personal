@@ -3,12 +3,15 @@
 import { useLang } from "@/components/providers/LanguageProvider";
 
 type Props = {
-  kickerKey: "about" | "experience" | "projects" | "skills" | "certs" | "contact";
   title: string;
   centered?: boolean;
-};
+} & (
+  | { kickerKey: "about" | "experience" | "projects" | "skills" | "certs" | "contact"; kicker?: string }
+  /** A section without an entry in content.ts brings its own kicker. */
+  | { kickerKey?: never; kicker: string }
+);
 
-export default function SectionHeading({ kickerKey, title, centered = false }: Props) {
+export default function SectionHeading({ kickerKey, kicker, title, centered = false }: Props) {
   const { t } = useLang();
   const kickerMap = {
     about: t.about.kicker,
@@ -21,7 +24,7 @@ export default function SectionHeading({ kickerKey, title, centered = false }: P
 
   return (
     <div data-reveal className={`mb-14 md:mb-16 ${centered ? "flex flex-col items-center text-center" : ""}`}>
-      <p className="section-heading-kicker font-mono text-[11px] tracking-[0.28em] text-cyan uppercase">{kickerMap[kickerKey]}</p>
+      <p className="section-heading-kicker font-mono text-[11px] tracking-[0.28em] text-cyan uppercase">{kicker ?? (kickerKey && kickerMap[kickerKey])}</p>
       <h2 className={`mt-3 max-w-2xl font-display text-3xl font-medium tracking-[-0.045em] sm:text-4xl md:text-5xl ${centered ? "" : ""}`}>
         {title}
       </h2>

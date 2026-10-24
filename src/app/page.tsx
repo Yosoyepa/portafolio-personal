@@ -6,6 +6,7 @@ import Metrics from "@/components/Metrics";
 import About from "@/components/About";
 import Experience from "@/components/Experience";
 import Projects from "@/components/Projects";
+import Activity from "@/components/Activity";
 import Skills from "@/components/Skills";
 import Certifications from "@/components/Certifications";
 import Contact from "@/components/Contact";
@@ -22,6 +23,7 @@ export default function Home() {
         <About />
         <Experience />
         <Projects />
+        <Activity />
         <Skills />
         <Certifications />
         <Contact />

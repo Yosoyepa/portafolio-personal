@@ -58,7 +58,32 @@ export interface ActivityHeatmapProps {
   actions?: ReactNode;
   /** Formatting locale. Fixed by default so server and client render the same labels. */
   locale?: string;
+  /** Translated words around the numbers. Anything left out keeps its English default. */
+  strings?: Partial<ActivityHeatmapStrings>;
   className?: string;
+}
+
+export interface ActivityHeatmapStrings {
+  /** "1,284 contributions in {period}". */
+  in: string;
+  /** Zero days: "No contributions" in the tooltip and the cell label, lowercased inside level ranges. */
+  none: string;
+  /** Level ranges: "1 to 4 contributions". */
+  to: string;
+  /** Top level: "17 or more contributions". */
+  orMore: string;
+  day: string;
+  days: string;
+  /** Legend caption: "12 days with 1–4 contributions". */
+  with: string;
+  less: string;
+  more: string;
+  highlightGroup: string;
+  highlightDays: string;
+  /** "Darker squares mean more {unit}." */
+  legend: string;
+  /** "Levels: …". */
+  levels: string;
 }
 
 type Model = {
@@ -168,6 +193,21 @@ function buildModel(
 }
 
 const CONTRIBUTIONS = { one: "contribution", other: "contributions" };
+const STRINGS: ActivityHeatmapStrings = {
+  in: "in",
+  none: "No",
+  to: "to",
+  orMore: "or more",
+  day: "day",
+  days: "days",
+  with: "with",
+  less: "Less",
+  more: "More",
+  highlightGroup: "Highlight days by level",
+  highlightDays: "Highlight days with",
+  legend: "Darker squares mean more",
+  levels: "Levels",
+};
 const noun = (count: number, unit: { one: string; other: string }) =>
   count === 1 ? unit.one : unit.other;
 const noopSubscribe = () => () => {};
@@ -207,7 +247,7 @@ const tipText = (reduced: boolean): Variants => ({
 
 /** A total that rolls digit by digit in the direction it moved. Places keep their identity, so only changed digits turn,
  *  and when the number gains or loses a digit the width follows on a spring instead of shifting the sentence in one frame. */
-function RollingNumber({
+export function RollingNumber({
   value,
   locale,
   reduced,
@@ -366,6 +406,7 @@ export function ActivityHeatmap({
   onSelectDate,
   actions,
   locale = "en-US",
+  strings,
   className,
 }: ActivityHeatmapProps) {
   const reduced = useReducedMotionSafe();
@@ -375,6 +416,9 @@ export function ActivityHeatmap({
     () => ({ one: unitProp.one, other: unitProp.other }),
     [unitProp.one, unitProp.other],
   );
+  const text = { ...STRINGS, ...strings };
+  const none = text.none;
+  const noneInRange = none.charAt(0).toLowerCase() + none.slice(1);
   const rootRef = useRef<HTMLDivElement>(null);
   const plotRef = useRef<HTMLDivElement>(null);
   const gridRef = useRef<HTMLDivElement>(null);
@@ -478,7 +522,7 @@ export function ActivityHeatmap({
       key: `day-${toIso(date.getTime())}`,
       primary: count
         ? `${formats.number.format(count)} ${noun(count, unit)}`
-        : `No ${unit.other}`,
+        : `${none} ${unit.other}`,
       secondary: formats.short.format(date),
       value: count,
       anchor,
@@ -486,14 +530,14 @@ export function ActivityHeatmap({
   }
   const [a, b, c] = model.thresholds;
   const ranges = [
-    `no ${unit.other}`,
-    a === 1 ? `1 ${unit.one}` : `1 to ${a} ${unit.other}`,
-    `${a + 1} to ${b} ${unit.other}`,
-    `${b + 1} to ${c} ${unit.other}`,
-    `${c + 1} or more ${unit.other}`,
+    `${noneInRange} ${unit.other}`,
+    a === 1 ? `1 ${unit.one}` : `1 ${text.to} ${a} ${unit.other}`,
+    `${a + 1} ${text.to} ${b} ${unit.other}`,
+    `${b + 1} ${text.to} ${c} ${unit.other}`,
+    `${c + 1} ${text.orMore} ${unit.other}`,
   ];
   const shortRanges = [
-    `no ${unit.other}`,
+    `${noneInRange} ${unit.other}`,
     a === 1 ? `1 ${unit.one}` : `1–${a} ${unit.other}`,
     `${a + 1}–${b} ${unit.other}`,
     `${b + 1}–${c} ${unit.other}`,
@@ -502,9 +546,11 @@ export function ActivityHeatmap({
   const dayCount =
     highlight === null
       ? ""
-      : `${formats.number.format(model.perLevel[highlight])} ${model.perLevel[highlight] === 1 ? "day" : "days"}`;
+      : `${formats.number.format(model.perLevel[highlight])} ${model.perLevel[highlight] === 1 ? text.day : text.days}`;
   const caption =
-    highlight === null ? "" : `${dayCount} with ${shortRanges[highlight]}`;
+    highlight === null
+      ? ""
+      : `${dayCount} ${text.with} ${shortRanges[highlight]}`;
   function show(next: Tip) {
     window.clearTimeout(hideTimer.current);
     setChange(
@@ -680,7 +726,7 @@ export function ActivityHeatmap({
                 aria-selected={
                   onSelectDate ? index === selectedIndex : undefined
                 }
-                aria-label={`${count ? formats.number.format(count) : "No"} ${noun(count, unit)}, ${formats.long.format(date)}`}
+                aria-label={`${count ? formats.number.format(count) : none} ${noun(count, unit)}, ${formats.long.format(date)}`}
                 onClick={() => onSelectDate?.(toIso(date.getTime()))}
               />
             );
@@ -695,6 +741,7 @@ export function ActivityHeatmap({
       selectedIndex,
       formats,
       unit,
+      none,
       onSelectDate,
     ],
   );
@@ -715,7 +762,7 @@ export function ActivityHeatmap({
     ? Math.floor((selectedIndex + model.lead) / 7)
     : 0;
   const selectedRow = hasSelection ? (selectedIndex + model.lead) % 7 : 0;
-  const summary = `${formats.number.format(model.total)} ${noun(model.total, unit)} in ${period}`;
+  const summary = `${formats.number.format(model.total)} ${noun(model.total, unit)} ${text.in} ${period}`;
 
   return (
     <div
@@ -733,7 +780,7 @@ export function ActivityHeatmap({
             {noun(model.total, unit)}
           </span>{" "}
           <span className={styles.period}>
-            in <RiseText text={period} reduced={reduced} />
+            {text.in} <RiseText text={period} reduced={reduced} />
           </span>
           <span className={styles.srOnly} role="status">
             {summary}
@@ -799,7 +846,7 @@ export function ActivityHeatmap({
 
       <div className={styles.legend}>
         <span id={`${id}-legend`} className={styles.srOnly}>
-          Darker squares mean more {unit.other}. Levels: {ranges.join(", ")}.
+          {text.legend} {unit.other}. {text.levels}: {ranges.join(", ")}.
         </span>
         <span className={styles.caption} aria-live="polite">
           <RiseText text={caption} reduced={reduced}>
@@ -814,12 +861,12 @@ export function ActivityHeatmap({
         </span>
         <span className={styles.scale}>
           <span className={styles.legendText} aria-hidden="true">
-            Less
+            {text.less}
           </span>
           <div
             className={styles.swatches}
             role="group"
-            aria-label="Highlight days by level"
+            aria-label={text.highlightGroup}
             onKeyDown={onLegendKeyDown}
           >
             {LEVELS.map((level) => (
@@ -831,7 +878,7 @@ export function ActivityHeatmap({
                 data-level={level}
                 tabIndex={level === legendFocus ? 0 : -1}
                 aria-pressed={pinned === level}
-                aria-label={`Highlight days with ${ranges[level]}`}
+                aria-label={`${text.highlightDays} ${ranges[level]}`}
                 onClick={() =>
                   setPinned((current) => (current === level ? null : level))
                 }
@@ -846,7 +893,7 @@ export function ActivityHeatmap({
             ))}
           </div>
           <span className={styles.legendText} aria-hidden="true">
-            More
+            {text.more}
           </span>
         </span>
       </div>

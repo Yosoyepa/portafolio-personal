@@ -77,7 +77,6 @@ export const BRAND_ICONS: Readonly<Record<string, BrandIconData>> = {
   opensearch: si(siOpensearch),
   airflow: si(siApacheairflow),
   postgresql: si(siPostgresql),
-  sql: si(siPostgresql),
   // DevOps y calidad
   docker: si(siDocker),
   "github actions": si(siGithubactions),

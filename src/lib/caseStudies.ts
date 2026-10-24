@@ -1,4 +1,4 @@
-/** Public repository evidence, reviewed 2026-09-07 (Ommatix: 2026-10-24). See docs/portfolio-evidence.md. */
+/** Public repository evidence, reviewed 2026-09-07 (Ommatix and CloudPath: 2026-10-24). See docs/portfolio-evidence.md. */
 export type ProjectCategory = "agents" | "cloud" | "tooling";
 type Story = { name: string; headline: string; description: string; status: string; proof: string; details: string[]; award: string | null };
 type CaseStudy = { id: string; year: string; category: ProjectCategory; tech: string[]; link: string; flow: string[]; featured?: boolean; es: Story; en: Story };
@@ -19,6 +19,23 @@ const cases: CaseStudy[] = [
       description: "The research prototype behind my thesis: a local Rust engine that gives desktop agents element IDs and revisions instead of coordinates, and refuses any action based on a stale observation.",
       status: "Open source · Research prototype", proof: "Fail-closed actuation: dry run by default", award: null,
       details: ["Incremental perception: it analyses only the regions that changed against the last committed frame and falls back to a full refresh when geometry or budgets require it.", "MCP contract with three tools (observe_screen, execute_action and get_engine_metrics); geometry stays inside the engine and every action needs a current observation.", "Preliminary evaluation with three models over MCP: 0 false successes and 0 safety events in the live phase. One series per model on synthetic apps, not a model ranking."],
+    },
+  },
+  {
+    id: "cloudpath", year: "2026", category: "agents", featured: true,
+    tech: ["TypeScript", "React", "FastAPI", "Gemini Live", "Claude", "MCP"],
+    link: "https://github.com/Yosoyepa/cloudpath-front", flow: ["VOICE", "ROUTE", "ADAPT"],
+    es: {
+      name: "CloudPath", headline: "Una entrevista por voz que se convierte en tu ruta hacia AWS.",
+      description: "Copiloto de voz para preparar AWS Cloud Practitioner: entrevista al estudiante en tiempo real, detecta sus brechas y genera un mapa de aprendizaje que se recalibra tras cada microlección y explica por qué cambió con fuentes oficiales de AWS.",
+      status: "Hackathon · Open source", proof: "Voz en tiempo real y una ruta que se adapta", award: "3.er puesto · Platanus Build Night 2026, Bogotá",
+      details: ["Entrevista por voz con Gemini Live y token efímero de un solo uso, con consentimiento de micrófono y alternativa escrita.", "API en FastAPI desplegada en Railway: perfil, lección y adaptación con contratos versionados; planificador con Claude, respaldo con MiniMax y un generador determinista final para que la demo nunca se bloquee.", "Fuentes oficiales mediante AWS Knowledge MCP en modo solo lectura y un mapa accesible con React Flow. Frontend en cloudpath-front; la API vive en agentic-dev-hackathon-setup."],
+    },
+    en: {
+      name: "CloudPath", headline: "A voice interview that becomes your path to AWS.",
+      description: "A voice copilot for AWS Cloud Practitioner prep: it interviews the student in real time, finds their gaps and builds a learning map that recalibrates after each micro-lesson and explains why it changed with official AWS sources.",
+      status: "Hackathon · Open source", proof: "Real-time voice and a path that adapts", award: "3rd place · Platanus Build Night 2026, Bogotá",
+      details: ["Voice interview with Gemini Live and a single-use ephemeral token, with microphone consent and a written alternative.", "FastAPI API deployed on Railway: profile, lesson and adaptation with versioned contracts; a Claude planner, a MiniMax fallback and a final deterministic generator so the demo never stalls.", "Official sources through AWS Knowledge MCP in read-only mode and an accessible map built with React Flow. The frontend lives in cloudpath-front; the API lives in agentic-dev-hackathon-setup."],
     },
   },
   {

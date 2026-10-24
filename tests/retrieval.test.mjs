@@ -59,9 +59,9 @@ test('both languages preserve the same credentials and all three career stages',
 test('the curated projects retain their identities, repo links and maturity in both languages', () => {
   const es = content.es.projects.items;
   const en = content.en.projects.items;
-  assert.equal(es.length, 7);
+  assert.equal(es.length, 8);
   assert.deepEqual(es.map(p => p.id), en.map(p => p.id));
-  assert.equal(new Set(es.map(p => p.id)).size, 7);
+  assert.equal(new Set(es.map(p => p.id)).size, 8);
   for (const [index, project] of es.entries()) {
     assert.match(project.link, /^https:\/\/github\.com\/Yosoyepa\/[^/]+$/);
     assert.equal(project.link, en[index].link);
@@ -73,5 +73,7 @@ test('the curated projects retain their identities, repo links and maturity in b
   assert.match(es.find(p => p.id === 'assistant').status, /Alpha/);
   assert.equal(es.find(p => p.id === 'oracle').link, 'https://github.com/Yosoyepa/secret-oracle-hackathon-aws');
   assert.equal(es.find(p => p.id === 'ommatix').link, 'https://github.com/Yosoyepa/Ommatix');
-  assert.deepEqual(es.filter(p => p.featured).map(p => p.id), ['ommatix']);
+  assert.equal(es.find(p => p.id === 'cloudpath').link, 'https://github.com/Yosoyepa/cloudpath-front');
+  assert.deepEqual(es.filter(p => p.featured).map(p => p.id), ['ommatix', 'cloudpath']);
+  assert.deepEqual(en.filter(p => p.featured).map(p => p.id), ['ommatix', 'cloudpath']);
 });
